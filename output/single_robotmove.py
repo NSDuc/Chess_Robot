@@ -39,7 +39,7 @@ srctheta2 = 38
 srctheta3 = -86.6
 pxldis = 0.0312
 d = np.around(pxldis * np.sqrt(rx1**2 + ry1**2),2)
-d_src = d
+d_src = d.copy()
 
 j45_rotate = 0
 if d > 34.5:
