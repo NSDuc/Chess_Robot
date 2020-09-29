@@ -1,9 +1,9 @@
 import cv2
 
-load(fullfile('black2.mat'));
-roi = im2uint8(roi1);
+load(fullfile('black2.mat'))
+roi = roi1.astype(np.uint8)
 
-Q = ConvoNN(roi);
+Q = ConvoNN(roi)
 
-Q = blackpreprocess(Q);
-cv2.imshow(Q);
+Q = blackpreprocess(Q)
+cv2.imshow(Q)
