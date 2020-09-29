@@ -18,13 +18,13 @@ def ConvoNN(roi=None,*args,**kwargs):
     if (median_rb > median_gb and median_rb >= 5):
         Q = redpreprocess(gray)
         predictedLabel = red5.classify(Q)
-        if (predictedLabel == 'r¨®') or (predictedLabel == '¥K') or (predictedLabel == '¬¶'):
+        if (predictedLabel == 'rÂ¨Â®') or (predictedLabel == 'Â¥K') or (predictedLabel == 'Â¬Â¶'):
             predictedLabel = red4.classify(Q)
     elif (median_gb > median_rb and median_gb >= 15):
         thresh = 0.38*255
         im_bw = cv2.threshold(im_gray, thresh, 255, cv2.THRESH_BINARY)[1]
-        Q = imcomplement(im_bw)
-        predictedLabel = categorical(cellstr('­I­±'))
+        Q = 255 - im_bw
+        predictedLabel = categorical(cellstr('Â­IÂ­Â±'))
     else:
         Q = blackpreprocess(gray)
         predictedLabel = black2.classify(Q)
