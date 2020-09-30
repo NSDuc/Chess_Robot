@@ -33,25 +33,22 @@ def catchroi(src=None):
     stats = regionprops(openbw,'basic')
     c = np.concentrate(1, stats.BoundingBox)
 
-    #np.nonzero
-    selc = find(
-        np.abs(c(arange(),3) - c(arange(),4)) <= logical_and(20,c(arange(),3)) >= logical_and(75,c(arange(),3)) <= 120)
-    #assignin('base','c',c);
-    #assignin('base','y',y);
-    
-    center = np.concentrate(1,stats.Centroid)
-    center = fix(center(selc,arange()))
-    for i in range(0, selc.size):
-        if c(selc(i),3) - dot((center(i,1) - c(selc(i),1)),2) > 5:
-            c[selc(i),3]=c(selc(i),3) - (c(selc(i),3) - dot((center(i,1) - c(selc(i),1)),2)) + 1
-    
-    for i in range(0, selc.size):
-        if c(selc(i),4) - dot((center(i,2) - c(selc(i),2)),2) > 5:
-            c[selc(i),4]=c(selc(i),4) - (c(selc(i),4) - dot((center(i,2) - c(selc(i),2)),2)) + 1
+    selc = np.where(
+        np.abs(c[:,2] - c[:,3]) <= 20 && (c[:,3] >= 75) && (c[:,3] <= 120)
+    )
 
+    center = np.concentrate(1,stats.Centroid)
+    center = np.fix(center[selc,:])
+    for i in range(0, selc.size):
+        if (c[selc[i],3] - (center[i,1] - c[selc[i],1])*2) > 5:
+            c[selc[i],3] = c[selc[i],3] - (c[selc[i],3] - (center[i,1] - c[selc[i],1])*2) + 1
+    
+    for i in range(0, selc.size):
+        if c[selc[i],3] - (center[i,1] - c[selc[i],1])*2 > 5:
+            c[selc[i],3] = c[selc[i],3] - c[selc[i],3] - (center[i,2] - c[selc[i],2])*2 + 1
  
-    posX=center(arange(),1)
-    posY=center(arange(),2)
+    posX = center[:,0]
+    posY = center[:,1]
     
     return c,selc,posX,posY,openbw,src
     

@@ -3,7 +3,7 @@ import numpy as np
 def calcu_position(predicted,posX,posY):
     #global chesslocation
     #load chesslocation.mat
-    L = size(posX,1);
+    L = posX.shape[0]
     for i in range(0,L):
         x = posX[i]
         y = posY[i]
@@ -11,8 +11,8 @@ def calcu_position(predicted,posX,posY):
         chess_h = 32.05
         x = np.around(x +((chess_h * (camposi_x - x)) / camposi_xh),1)
         y = np.around(y +((chess_h * (camposi_y - y)) / camposi_yh),1)
-        src = np.array([x,y,1]).T;
-        thx = 180;
+        src = np.array([x,y,1]).T
+        thx = 180
         thxrad = np.deg2rad(thx)
         rotx = np.array([[1,0,0],
             [0,np.cos(thxrad),-np.sin(thxrad)],
@@ -42,12 +42,12 @@ def calcu_position(predicted,posX,posY):
         srctheta2 = 41.3;
         srctheta3 = -89;
         pxldis = 0.0312;
-        d = np.around(pxldis * np.sqrt(rx1**2 + ry1**2))
+        d = np.around((pxldis * np.sqrt(rx1**2 + ry1**2)), 2)
         d_src = d;
         
             
         if (d > 34.5):
-            d = 34.5;
+            d = 34.5
             d_dif = d_src[i] - d;
             j45_theta = np.arcsin(np.deg2rad(d_dif/9.2))
             j45[i] = np.around(-j45_theta * 4.27);
@@ -71,13 +71,13 @@ def calcu_position(predicted,posX,posY):
     currentj1 = 0;
     currentj36 = 0;
     chess = np.array([j1.T, j2.T, j36.T, j45.T, j45_rotate.T])
-    b = [7 9 5 3 1 2 4 8 6 23 25 21 19 17 18 20 24 22 11 10 27 26 33 16 12 15 13 14 32 28 31 29 30];
-    for p in range(0,33):
-        prior[p,:] = chesslocation(b[p],:);
-    order = np.zeros(L[0],5);
+    b = np.array([7 9 5 3 1 2 4 8 6 23 25 21 19 17 18 20 24 22 11 10 27 26 33 16 12 15 13 14 32 28 31 29 30])
+    for p in range(0,32):
+        prior[p,:] = chesslocation(b[p],:)
+    order = np.zeros((L[0],5))
     for a in range(0,L):
         k = np.where(predicted[a] == prior).shape[]
-        order[a,1:k] = np.where(predicted[a] == prior);
-        index[a,1:k] = np.where(predicted[a] == prior);
+        order[a,0:k] = np.where(predicted[a] == prior)
+        index[a,0:k] = np.where(predicted[a] == prior)
 
     return chess,order,index,prior
