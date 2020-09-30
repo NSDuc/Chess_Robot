@@ -1,13 +1,13 @@
 import numpy as np
 
-def main:
+def main():
     my_posX = np.array([52 , 283, 405, 546]).T
     my_posY = np.array([102, 249, 579, 462]).T
 
     calcu_position (0, my_posX, my_posY)
 
 def calcu_position(predicted,posX,posY):
-    import chesslocation.py
+    import chesslocation
     L = np.shape(posX)[0]
     new = np.zeros((L, 3))
     j1 = np.zeros(L).T
@@ -91,3 +91,5 @@ def calcu_position(predicted,posX,posY):
     #     index[a,0:k] = find(strcmp(predicted(a),prior));
 
     return chess, order, index, prior
+
+main()
