@@ -1,6 +1,6 @@
 import numpy as np
 
-def main():
+def test():
     my_posX = np.array([52 , 283, 405, 546]).T
     my_posY = np.array([102, 249, 579, 462]).T
 
@@ -8,16 +8,18 @@ def main():
 
 def calcu_position(predicted,posX,posY):
     import chesslocation
-    L = np.shape(posX)[0]
+    L   = np.shape(posX)[0]
     new = np.zeros((L, 3))
-    j1 = np.zeros(L).T
-    j2 = np.zeros(L).T
+    j1  = np.zeros(L).T
+    j2  = np.zeros(L).T
     j36 = np.zeros(L).T
     j45 = np.zeros(L).T
     j45_rotate = np.zeros(L).T
+    nxy = np.zeros((L,2))
     for i in range(L):
         x = posX[i]
         y = posY[i]
+
         camposi_x = 682.3
         camposi_y = 494.7
         camposi_xh = 1508
@@ -37,7 +39,7 @@ def calcu_position(predicted,posX,posY):
         scale = np.eye(3, dtype=float)
         tran  = np.array([[1, 0, -475], [0, 1, 187], [0, 0, 1]])
         new[i,:] = np.around((rotx @ rotz @ tran @ scale @ src),2).T.copy()
-        nxy = new[i,0:2].copy()
+        nxy[i,:] = new[i,0:2].copy()
         rx = nxy[i,0]
         ry = nxy[i,1]
         degree = np.rad2deg(np.arctan2(ry,rx))
@@ -77,19 +79,19 @@ def calcu_position(predicted,posX,posY):
 
     currentj1  = 0
     currentj36 = 0
-    prior = np.zeros((33,6))
-    chess = np.array([j1.T, j2.T, j36.T, j45.T, j45_rotate.T])
+    prior = np.zeros((33,9), dtype = object)
+    chess = np.array([j1, j2, j36, j45, j45_rotate]).T
     b = [7 , 9 , 5 , 3 , 1 , 2 , 4 , 8 , 6 , 23, 25,
          21, 19, 17, 18, 20, 24, 22, 11, 10, 27, 26,
          33, 16, 12, 15, 13, 14, 32, 28, 31, 29, 30];
-    # for p in range(33):
-    #     prior[p,:] = chesslocation.chesslocation((b[p] - 1),:);
-    # order = np.zeros((L,5));
-    # for a in range(L):
+    for p in range(0,33):
+         prior[p,:] = chesslocation.matrix[(b[p] - 1),:]
+    order = np.zeros((L,5));
+    # for a in range(0,L):
     #     k = size(find(strcmp(predicted(a),prior)));
     #     order[a,0:k] = find(strcmp(predicted(a),prior));
     #     index[a,0:k] = find(strcmp(predicted(a),prior));
 
     return chess, order, index, prior
 
-main()
+test()
