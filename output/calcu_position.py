@@ -1,10 +1,14 @@
 import numpy as np
 
 def test():
-    my_posX = np.array([52 , 283, 405, 546]).T
-    my_posY = np.array([102, 249, 579, 462]).T
+    # my_posX = np.array([52 , 283, 405, 546]).T
+    # my_posY = np.array([102, 249, 579, 462]).T
+    # calcu_position (0, my_posX, my_posY)
 
-    calcu_position (0, my_posX, my_posY)
+    posX = np.array([409,435,460,472,512,553,584,618,645,660,720,730,788,808,823,847]).T
+    posY = np.array([555,662,457,353,548,655,428,542,332,674,420,565,677,339,470,594]).T
+    predicted = np.array(["仕","r車","相","傌","炮","兵","炮","相","兵","兵","帥","兵","兵","炮","仕","傌"])
+    calcu_position(predicted, posX, posY)
 
 def calcu_position(predicted,posX,posY):
     import chesslocation
@@ -86,12 +90,18 @@ def calcu_position(predicted,posX,posY):
          33, 16, 12, 15, 13, 14, 32, 28, 31, 29, 30];
     for p in range(0,33):
          prior[p,:] = chesslocation.matrix[(b[p] - 1),:]
-    order = np.zeros((L,5));
-    # for a in range(0,L):
-    #     k = size(find(strcmp(predicted(a),prior)));
-    #     order[a,0:k] = find(strcmp(predicted(a),prior));
-    #     index[a,0:k] = find(strcmp(predicted(a),prior));
-
+    order = np.zeros((L,5))
+    index = np.full((L,5), -1)
+    print("predicted = ", predicted)
+    print("prior = ", prior)
+    for a in range(0,L):
+        w = np.where(predicted[a] == prior[:,0])[0]
+        k = w.size
+        order[a,0:k] = w;
+        index[a,0:k] = w;
+    print("\n\n")
+    print("order=", order)
+    print("index=", index)
     return chess, order, index, prior
 
 test()
