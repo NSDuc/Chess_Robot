@@ -1,4 +1,14 @@
 import numpy as np
+import time.sleep as pause
+def test():
+	s = None
+	cj1 = 1716
+	cj2 = 306
+	cj36 = -263
+	cj45r = 0
+	currentj1 = currentj36 = 0
+	robot_clamp2 (s, cj1, cj2, cj36, cj45r, currentj1, currentj36)
+
 def robot_clamp2 (s, cj1, cj2, cj36, cj45r, currentj1, currentj36):
 	j1 = cj1 - currentj1
 	j2 = cj2
@@ -12,6 +22,13 @@ def robot_clamp2 (s, cj1, cj2, cj36, cj45r, currentj1, currentj36):
 	joint45_chs  = '@STEP 221,0,0,0,' + str(j45) + ',' + str(-j45) + ',0,0'
 	joint45_chsi = '@STEP 221,0,0,0,' + str(-j45) + ',' + str(j45) + ',0,0'
 	gp_cl = '@STEP 221,0,0,0,0,0,-110,0'
+
+	print(joint1_chs)
+	print(joint2_chs)
+	print(joint2_chsi)
+	print(joint36_chs)
+	print(joint45_chs)
+	print(joint45_chsi)
 
 	for k in range(7):
 	    if k == 0:
@@ -71,3 +88,5 @@ def robot_clamp2 (s, cj1, cj2, cj36, cj45r, currentj1, currentj36):
 	currentj1 = cj1
 	currentj36 = cj36
 	return currentj1, currentj36
+
+test()

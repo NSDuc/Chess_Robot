@@ -8,7 +8,24 @@ def test():
     posX = np.array([409,435,460,472,512,553,584,618,645,660,720,730,788,808,823,847]).T
     posY = np.array([555,662,457,353,548,655,428,542,332,674,420,565,677,339,470,594]).T
     predicted = np.array(["仕","r車","相","傌","炮","兵","炮","相","兵","兵","帥","兵","兵","炮","仕","傌"])
-    calcu_position(predicted, posX, posY)
+    chess, order, index, prior = calcu_position(predicted, posX, posY)
+
+    print(prior)
+    print()
+    sortidx = np.argsort(order[:, 0])
+    print("sortidx=", sortidx)
+    print()
+    sortchess = order[np.argsort(order[:, 0])]
+    print("sortchess=", sortchess)
+    L = posX.size
+    for j in range(0,1):
+        curt_tag = sortchess[j,np.nonzero(sortchess[j,:])[0]]
+        print(curt_tag)
+        print(prior[curt_tag.astype(np.int),8])
+        tag_check = np.where(prior[curt_tag.astype(np.int),8] == '0')[0]
+        tag = curt_tag[tag_check[0]]
+        print("tag=", tag)
+        pass
 
 def calcu_position(predicted,posX,posY):
     import chesslocation
@@ -92,16 +109,12 @@ def calcu_position(predicted,posX,posY):
          prior[p,:] = chesslocation.matrix[(b[p] - 1),:]
     order = np.zeros((L,5))
     index = np.full((L,5), -1)
-    print("predicted = ", predicted)
-    print("prior = ", prior)
+
     for a in range(0,L):
         w = np.where(predicted[a] == prior[:,0])[0]
         k = w.size
         order[a,0:k] = w;
         index[a,0:k] = w;
-    print("\n\n")
-    print("order=", order)
-    print("index=", index)
     return chess, order, index, prior
 
 test()
