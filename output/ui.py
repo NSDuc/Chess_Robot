@@ -2,6 +2,8 @@ import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore    import *
 from PyQt5.QtGui     import *
+import
+
 
 currentj1  = 0
 currentj36 = 0
@@ -107,8 +109,45 @@ class MainWindow(QMainWindow):
     def cb_button_start(self):
         global currentj1 
         global currentj36
-        global currentj6 
+        global currentj6
+        global selc, chess, order, index, prior, predicted
+        
         print("startBtn")
+        L = selc.shape[0]
+        sortidx = np.argsort(order[:, 0])
+        sortchess = order[np.argsort(order[:, 0])]
+        print("sortidx=", sortidx)
+        print("sortchess=", sortchess)
+
+        for j in range(L):
+            curt_tag = sortchess[j,np.nonzero(sortchess[j,:])[0]]
+            print(curt_tag)
+            print(prior[curt_tag.astype(np.int),8])
+            tag_check = np.where(prior[curt_tag.astype(np.int),8] == '0')[0]
+            tag = curt_tag[tag_check[0]]
+            print("tag=", tag)
+
+            currentj1, currentj36 = robot_clamp2(chess[sortidx[j],0], chess[sortidx[j],1],chess[sortidx[j],2],chess[sortidx[j],4], currentj1, currentj36)
+            if tag == 23:
+                cam = cv2.VideoCapture(0)
+                ret, frame2 = cam.read()
+                if(not ret):
+                    print("Fail to get camera image")
+                    return
+
+                tx, ty = turn_catch(frame2)
+                turnroi = frame2[tx-50:tx+49,ty-50:ty+49,:]
+                roi = turnroi.astype(np.unit8)
+                predictedLabel[L+1] = ConvoNN(roi)
+                predicted[L+1] = str(predictedLabel[L+1])
+                pause(0.1)
+            else:
+                robo_tag[j,:] = prior[tag,3:7].astype(np.float);
+            currentj1, currentj36, check = robot_place2(s, 
+                robo_tag[j,0], robo_tag[j,1], robo_tag[j,2], robo_tag[j,3], robo_tag[j,4], currentj1, currentj36)
+            prior[tag,8] = check
+
+
 
     # Button2
     def cb_button_connect(self):
