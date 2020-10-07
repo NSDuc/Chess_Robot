@@ -20,6 +20,8 @@ class MainWindow(QMainWindow):
   def __init__(self, *args, **kwargs):
     super(MainWindow, self).__init__(*args, **kwargs)
 
+    self.roi_list = []
+
     self.setWindowTitle("Chess Robot")
     self.setGeometry(100, 100, 1000, 500)
 
@@ -31,25 +33,36 @@ class MainWindow(QMainWindow):
     layoutMain.addLayout(layoutImgs)
     layoutMain.addLayout(layoutChss)
 
-    self.label1 = QLabel("LABEL 1")
-    self.label2 = QLabel("LABEL 2")
-    self.label3 = QLabel("LABEL 3")
+    self.label1 = QLabel("Captured Image")
+    self.label2 = QLabel("Binary Image")
+    self.label3 = QLabel("Chess")
     self.label1.setAlignment(Qt.AlignCenter)
     self.label2.setAlignment(Qt.AlignCenter)
     self.label3.setAlignment(Qt.AlignCenter)
 
 
     self.tableWidget = QTableWidget(32, 3)
-    self.tableWidget.setFixedSize(500, 250)
+    self.tableWidget.setFixedSize(500, 180)
     tab1vbox = QVBoxLayout()
     tab1vbox.setContentsMargins(5, 5, 5, 5)
     tab1vbox.addWidget(self.tableWidget)
 
+    tableHHeader0 = QTableWidgetItem()
+    tableHHeader1 = QTableWidgetItem()
+    tableHHeader2 = QTableWidgetItem()
+    self.tableWidget.setHorizontalHeaderItem(0, tableHHeader0)
+    self.tableWidget.setHorizontalHeaderItem(1, tableHHeader1)
+    self.tableWidget.setHorizontalHeaderItem(2, tableHHeader2)
+    self.tableWidget.horizontalHeaderItem(0).setText("Predicted")
+    self.tableWidget.horizontalHeaderItem(1).setText("PositionX")
+    self.tableWidget.horizontalHeaderItem(2).setText("PositionY")
+    self.tableWidget.clicked.connect (self.cb_table)
+
     layoutImgs.addWidget(self.label1)
     layoutImgs.addWidget(self.label2)
-    layoutImgs.addWidget(self.label3)
 
     layoutChss.addLayout(tab1vbox)
+    layoutChss.addWidget(self.label3)
     layoutChss.addLayout(layoutBtns)
 
     widget = QWidget()
@@ -91,6 +104,19 @@ class MainWindow(QMainWindow):
     layout.addWidget(self.stopBtn)
     layout.addWidget(self.exitBtn)
     return layout
+
+  def cb_table(self, item):
+    print("You clicked on row " + str(item.row()) + " column " + str(item.column()))
+    roi = self.roi_list[item.row()]
+    qformat = QImage.Format_Indexed8
+    img = QImage(roi,
+                 roi.shape[1],
+                 roi.shape[0],
+                 roi.strides[0],
+                 qformat)
+    img = img.rgbSwapped()
+    self.label3.setPixmap(QPixmap.fromImage(img))
+    self.label3.setAlignment(Qt.AlignCenter)
 
   # Button1
   def cb_button_recognition(self):
@@ -148,10 +174,18 @@ class MainWindow(QMainWindow):
             sub_image = openbw[regionYb:regionYe,regionXb:regionXe]
             chess_list.append(gray_src[regionYb:regionYe,regionXb:regionXe].copy())
 
+    print('Number of chess: '+ str(len(chess_list)))
+    print(posX_list)
+    print(posY_list)
     posX = np.array(posX_list).T
     posY = np.array(posY_list).T
 
-    roi_list = []
+    # Mark Position on image
+    blue_dot = [255,0,0]
+    for i in range(len(posX_list)):
+      self.src[(posY_list[i] - 2):(posY_list[i] + 2),(posX_list[i] - 2):(posX_list[i] + 2)] = blue_dot
+    cv2.imwrite("dot.jpg",self.src)
+
     for index in range(len(chess_list)):
       gray = cv2.resize(chess_list[index], dsize=(90, 90), interpolation=cv2.INTER_LINEAR)
       thresh, a = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
@@ -193,35 +227,19 @@ class MainWindow(QMainWindow):
       Q[Q > 0]  = 255
     
       closeQ = cv2.morphologyEx(Q, cv2.MORPH_CLOSE, se)
-      roi_list.append(closeQ)
-
-    roi = roi_list[0]
-    qformat = QImage.Format_Indexed8
-    img = QImage(roi,
-                 roi.shape[1],
-                 roi.shape[0],
-                 roi.strides[0],
-                 qformat)
-    img = img.rgbSwapped()
-    self.label3.setPixmap(QPixmap.fromImage(img))
-    self.label3.setAlignment(Qt.AlignCenter)
+      # cv2.imshow("roi" + str(index),closeQ)
+      cv2.imwrite("roi" + str(index) + ".jpg", closeQ)
+      self.roi_list.append(closeQ)
 
     # TODO ConVoNN
     predicted_all = np.array(["仕","車","相","傌","炮","兵","炮","相","兵","兵","帥","兵","兵","炮","仕","傌"])
     predicted = predicted_all[0:len(chess_list)].copy()
     
     chessdata = np.array([predicted.T, posX, posY])
+    print(chessdata)
     posi      = np.array([posX, posY])
+    print(chessdata.shape)
     m, n = chessdata.shape
-    
-    self.tableWidget.setItem(0,0, QTableWidgetItem("Cell (1,1)"))
-    self.tableWidget.setItem(0,1, QTableWidgetItem("Cell (1,2)"))
-    self.tableWidget.setItem(1,0, QTableWidgetItem("Cell (2,1)"))
-    self.tableWidget.setItem(1,1, QTableWidgetItem("Cell (2,2)"))
-    self.tableWidget.setItem(2,0, QTableWidgetItem("Cell (3,1)"))
-    self.tableWidget.setItem(2,1, QTableWidgetItem("Cell (3,2)"))
-    self.tableWidget.setItem(3,0, QTableWidgetItem("Cell (4,1)"))
-    self.tableWidget.setItem(3,1, QTableWidgetItem("Cell (4,2)"))
 
     for i in range(len(chess_list)):
       self.tableWidget.setItem(i,0, QTableWidgetItem(predicted[i]))
