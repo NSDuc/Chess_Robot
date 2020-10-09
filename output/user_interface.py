@@ -6,6 +6,8 @@ from PyQt5.QtGui   import *
 import numpy as np
 import cv2
 import calcu_position
+from keras.models import load_model
+
 
 class Color(QWidget):
   def __init__(self, color, *args, **kwargs):
@@ -20,7 +22,21 @@ class MainWindow(QMainWindow):
   def __init__(self, *args, **kwargs):
     super(MainWindow, self).__init__(*args, **kwargs)
 
+    self.chess_label = ['Cannon', 'Chariot', 'Elephant', 'General', 'Guard', 'Horse', 'Sodier']
+
+    self.model_red = load_model(r'E:\robot_arm\train_cnn\model_red.h5')
+    self.model_black = load_model(r'E:\robot_arm\train_cnn\model_red.h5')
+
     self.roi_list = []
+    self.chess     = None
+    self.order     = None
+    self.index     = None
+    self.prior     = None
+    self.predicted = None
+
+    self.currentj1  = 0
+    self.currentj36 = 0
+    self.currentj6  = 0
 
     self.setWindowTitle("Chess Robot")
     self.setGeometry(100, 100, 1000, 500)
@@ -173,19 +189,19 @@ class MainWindow(QMainWindow):
             posY_list.append(int(rect[1] + rect[3] / 2))
             sub_image = openbw[regionYb:regionYe,regionXb:regionXe]
             chess_list.append(gray_src[regionYb:regionYe,regionXb:regionXe].copy())
-
+    
     print('Number of chess: '+ str(len(chess_list)))
     print(posX_list)
     print(posY_list)
     posX = np.array(posX_list).T
     posY = np.array(posY_list).T
-
+    
     # Mark Position on image
     blue_dot = [255,0,0]
     for i in range(len(posX_list)):
       self.src[(posY_list[i] - 2):(posY_list[i] + 2),(posX_list[i] - 2):(posX_list[i] + 2)] = blue_dot
     cv2.imwrite("dot.jpg",self.src)
-
+    
     for index in range(len(chess_list)):
       gray = cv2.resize(chess_list[index], dsize=(90, 90), interpolation=cv2.INTER_LINEAR)
       thresh, a = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
@@ -227,30 +243,40 @@ class MainWindow(QMainWindow):
       Q[Q > 0]  = 255
     
       closeQ = cv2.morphologyEx(Q, cv2.MORPH_CLOSE, se)
-      # cv2.imshow("roi" + str(index),closeQ)
       cv2.imwrite("roi" + str(index) + ".jpg", closeQ)
       self.roi_list.append(closeQ)
 
-    # TODO ConVoNN
-    predicted_all = np.array(["仕","車","相","傌","炮","兵","炮","相","兵","兵","帥","兵","兵","炮","仕","傌"])
-    predicted = predicted_all[0:len(chess_list)].copy()
-    
-    chessdata = np.array([predicted.T, posX, posY])
+    label_list = []
+    for i in range(len(chess_list)):
+      X = np.reshape(self.roi_list[i],[1,90,90,1])
+      label_index = self.model_red.predict_classes(X)[0]
+      label_list.append(self.chess_label[label_index])
+    self.predicted = np.array(label_list).T
+
+    chessdata = np.array([self.predicted.T, posX, posY])
     print(chessdata)
     posi      = np.array([posX, posY])
     print(chessdata.shape)
     m, n = chessdata.shape
 
     for i in range(len(chess_list)):
-      self.tableWidget.setItem(i,0, QTableWidgetItem(predicted[i]))
+      self.tableWidget.setItem(i,0, QTableWidgetItem(self.predicted[i]))
       self.tableWidget.setItem(i,1, QTableWidgetItem(str(posX[i])))
       self.tableWidget.setItem(i,2, QTableWidgetItem(str(posY[i])))
-    chess, order, index, prior = calcu_position.calcu_position(predicted, posX, posY)
+    self.chess, self.order, self.index, self.prior = calcu_position.calcu_position(self.predicted, posX, posY)
 
   # Button6 startBtn
   def cb_button_start(self):
     print("startBtn")
+    chess     = self.chess
+    order     = self.order
+    index     = self.index
+    prior     = self.prior
+    predicted = self.predicted
+    s         = self.s
 
+    L = np.shape(self.predicted)[0]
+    
   # Button2
   def cb_button_connect(self):
     print("connectBtn")
