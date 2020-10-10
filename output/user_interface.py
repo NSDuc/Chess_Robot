@@ -8,6 +8,7 @@ import cv2
 import calcu_position
 from keras.models import load_model
 
+import robot_arm
 
 class Color(QWidget):
   def __init__(self, color, *args, **kwargs):
@@ -24,8 +25,8 @@ class MainWindow(QMainWindow):
 
     self.chess_label = ['Cannon', 'Chariot', 'Elephant', 'General', 'Guard', 'Horse', 'Sodier']
 
-    self.model_red = load_model(r'E:\robot_arm\train_cnn\model_red.h5')
-    self.model_black = load_model(r'E:\robot_arm\train_cnn\model_red.h5')
+    self.model_red = load_model('model_red.h5')
+    self.model_black = load_model('model_black.h5')
 
     self.roi_list = []
     self.chess     = None
@@ -137,7 +138,7 @@ class MainWindow(QMainWindow):
   # Button1
   def cb_button_recognition(self):
     print("recBtn")
-    self.src = cv2.imread(r'E:\robot_arm\matlab_only\img100.jpg')
+    self.src = cv2.imread('Picture1.jpg')
     gray_src = cv2.cvtColor(self.src, cv2.COLOR_BGR2GRAY)
     qformat = QImage.Format_RGB888
     img = QImage(self.src,
@@ -152,7 +153,7 @@ class MainWindow(QMainWindow):
     b,g,r = cv2.split(self.src)
     recognition = (0.1*r + 0.1*g + 0.8*b).astype(np.uint8)
     thresh, a  = cv2.threshold(recognition, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
-    _     , bw = cv2.threshold (recognition, thresh*0.72, 255, cv2.THRESH_BINARY)
+    _     , bw = cv2.threshold (recognition, thresh*0.4, 255, cv2.THRESH_BINARY)
     
     bw = 255 - bw
     se = np.array([[0,0,1,0,0],
@@ -268,14 +269,50 @@ class MainWindow(QMainWindow):
   # Button6 startBtn
   def cb_button_start(self):
     print("startBtn")
-    chess     = self.chess
-    order     = self.order
-    index     = self.index
-    prior     = self.prior
-    predicted = self.predicted
-    s         = self.s
+    # chess     = self.chess
+    # order     = self.order
+    # index     = self.index
+    # prior     = self.prior
+    # predicted = self.predicted
+    # s         = self.s
+    currentj1   = self.currentj1
+    currentj36  = self.currentj36
+    currentj6   = self.currentj6
+    
+    selc = np.array([6,8,10,11,22,30,34,42,48,51,52,54,62,64,65,72])
+    posX = np.array([409,435,460,472,512,553,584,618,645,660,720,730,788,808,823,847]).T
+    posY = np.array([555,662,457,353,548,655,428,542,332,674,420,565,677,339,470,594]).T
+    predicted = np.array(["仕","r車","相","傌","炮","兵","炮","相","兵","兵","帥","兵","兵","炮","仕","傌"])
+    chess, order, index, prior = robot_arm.calcu_position(predicted, posX, posY)
 
-    L = np.shape(self.predicted)[0]
+    L         = selc.shape[0]
+    prior     = np.c_[prior, np.zeros((prior.shape[0],1))]
+    robo_tag  = np.zeros((L,5))
+    sortidx   = np.argsort(order[:, 0])
+    sortchess = order[np.argsort(order[:, 0])]
+
+    for j in range(L):
+      print("j =", j)
+      curt_tag  = sortchess[j,np.nonzero(sortchess[j,:])[0]]
+      tag_check = np.where(prior[curt_tag.astype(np.int),8] == '0')[0]
+      tag       = curt_tag[tag_check[0]]
+
+      currentj1, currentj36 = robot_arm.robot_clamp2(chess[sortidx[j],0], chess[sortidx[j],1],chess[sortidx[j],2],chess[sortidx[j],4], currentj1, currentj36)
+      if tag == 23:
+        cam = cv2.VideoCapture(0)
+        _ , frame2 = cam.read()
+
+        tx, ty  = turn_catch(frame2)
+        turnroi = frame2[tx-50:tx+49,ty-50:ty+49,:]
+        roi     = turnroi.astype(np.unit8)
+        predictedLabel[L+1] = ConvoNN(roi)
+        predicted[L+1]      = str(predictedLabel[L+1])
+        robot_arm.pause(0.1)
+      else:
+        robo_tag[j,:] = prior[int(tag),3:8].astype(np.int);
+
+      currentj1, currentj36, check = robot_arm.robot_place2(robo_tag[j,0], robo_tag[j,1], robo_tag[j,2], robo_tag[j,3], robo_tag[j,4], currentj1, currentj36)
+      prior[int(tag),8] = check
     
   # Button2
   def cb_button_connect(self):
