@@ -117,4 +117,4 @@ def calcu_position(predicted,posX,posY):
         index[a,0:k] = w;
     return chess, order, index, prior
 
-test()
+# test()

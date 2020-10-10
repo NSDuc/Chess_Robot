@@ -1,13 +1,16 @@
 import sys
 import serial
+import numpy as np
+import cv2
+from keras.models import load_model
+
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore  import *
 from PyQt5.QtGui   import *
-import numpy as np
-import cv2
-import calcu_position
-from keras.models import load_model
 
+import calcu_position
+import catchroi
+import ConvoNN
 import robot_arm
 
 class Color(QWidget):
@@ -23,12 +26,12 @@ class MainWindow(QMainWindow):
   def __init__(self, *args, **kwargs):
     super(MainWindow, self).__init__(*args, **kwargs)
 
-    self.chess_label = ['Cannon', 'Chariot', 'Elephant', 'General', 'Guard', 'Horse', 'Sodier']
+    self.model_red = load_model(r'model_red.h5')
+    self.model_black = load_model(r'model_black.h5')
+    self.model_black.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
+    self.model_red.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
 
-    self.model_red = load_model('model_red.h5')
-    self.model_black = load_model('model_black.h5')
-
-    self.roi_list = []
+    self.chess_list = []
     self.chess     = None
     self.order     = None
     self.index     = None
@@ -123,13 +126,12 @@ class MainWindow(QMainWindow):
     return layout
 
   def cb_table(self, item):
-    print("You clicked on row " + str(item.row()) + " column " + str(item.column()))
-    roi = self.roi_list[item.row()]
+    chess = self.chess_list[item.row()]
     qformat = QImage.Format_Indexed8
-    img = QImage(roi,
-                 roi.shape[1],
-                 roi.shape[0],
-                 roi.strides[0],
+    img = QImage(chess,
+                 chess.shape[1],
+                 chess.shape[0],
+                 chess.strides[0],
                  qformat)
     img = img.rgbSwapped()
     self.label3.setPixmap(QPixmap.fromImage(img))
@@ -138,8 +140,8 @@ class MainWindow(QMainWindow):
   # Button1
   def cb_button_recognition(self):
     print("recBtn")
-    self.src = cv2.imread('Picture1.jpg')
-    gray_src = cv2.cvtColor(self.src, cv2.COLOR_BGR2GRAY)
+
+    self.src = cv2.imread(r'Picture 147.jpg')
     qformat = QImage.Format_RGB888
     img = QImage(self.src,
                  self.src.shape[1],
@@ -150,19 +152,8 @@ class MainWindow(QMainWindow):
     self.label1.setPixmap(QPixmap.fromImage(img).scaledToWidth(360))
     self.label1.setAlignment(Qt.AlignCenter)
 
-    b,g,r = cv2.split(self.src)
-    recognition = (0.1*r + 0.1*g + 0.8*b).astype(np.uint8)
-    thresh, a  = cv2.threshold(recognition, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
-    _     , bw = cv2.threshold (recognition, thresh*0.4, 255, cv2.THRESH_BINARY)
-    
-    bw = 255 - bw
-    se = np.array([[0,0,1,0,0],
-                   [0,1,1,1,0],
-                   [1,1,1,1,1],
-                   [0,1,1,1,0],
-                   [0,0,1,0,0]], np.uint8)
-    
-    openbw = cv2.morphologyEx(bw, cv2.MORPH_CLOSE, se)
+    raw_chess_list = []
+    openbw, raw_chess_list, posX, posY = catchroi.catchroi (self.src)
     qformat = QImage.Format_Indexed8
     img = QImage(openbw,
                  openbw.shape[1],
@@ -172,95 +163,20 @@ class MainWindow(QMainWindow):
     img = img.rgbSwapped()
     self.label2.setPixmap(QPixmap.fromImage(img).scaledToWidth(360))
     self.label2.setAlignment(Qt.AlignCenter)
-    
-    contours, hierarchy = cv2.findContours(openbw,  
-        cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-    
-    chess_list = []
-    posX_list  = []
-    posY_list  = []
-    for con in contours:
-        rect = cv2.boundingRect(con)
-        if rect[2] > 70 and rect[3] > 70:
-            regionXb = rect[0]
-            regionXe = rect[0] + rect[2]
-            regionYb = rect[1]
-            regionYe = rect[1] + rect[3]
-            posX_list.append(int(rect[0] + rect[2] / 2))
-            posY_list.append(int(rect[1] + rect[3] / 2))
-            sub_image = openbw[regionYb:regionYe,regionXb:regionXe]
-            chess_list.append(gray_src[regionYb:regionYe,regionXb:regionXe].copy())
-    
-    print('Number of chess: '+ str(len(chess_list)))
-    print(posX_list)
-    print(posY_list)
-    posX = np.array(posX_list).T
-    posY = np.array(posY_list).T
-    
-    # Mark Position on image
-    blue_dot = [255,0,0]
-    for i in range(len(posX_list)):
-      self.src[(posY_list[i] - 2):(posY_list[i] + 2),(posX_list[i] - 2):(posX_list[i] + 2)] = blue_dot
-    cv2.imwrite("dot.jpg",self.src)
-    
-    for index in range(len(chess_list)):
-      gray = cv2.resize(chess_list[index], dsize=(90, 90), interpolation=cv2.INTER_LINEAR)
-      thresh, a = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
-      _ , bw = cv2.threshold (gray, thresh*0.72, 255, cv2.THRESH_BINARY)
-      bw = 255 - bw
-    
-      se = np.array([[0,0,1,0,0],
-                     [0,1,1,1,0],
-                     [1,1,1,1,1],
-                     [0,1,1,1,0],
-                     [0,0,1,0,0]], np.uint8)
-      openbw = cv2.morphologyEx(bw, cv2.MORPH_CLOSE, se)
-    
-      mask = np.ones(gray.shape) * openbw
-      mask = mask / 255
-      mask = mask.astype(np.uint8)
-    
-      PP = gray * mask
-    
-      BW_circle = np.zeros((90, 90))
-      BW_circle = cv2.circle(BW_circle, (45, 45), 35, (255, 255, 255), -1)
-      BW_circle = BW_circle / 255
-      BW = BW_circle.astype(np.uint8).copy()
-      Q = PP * BW
 
-      unique_elements, counts_elements = np.unique(Q.flatten(), return_counts=True)
-      unique_elements = np.delete(unique_elements, [0])
-      counts_elements = np.delete(counts_elements, [0])
-      totalpercent = np.sum(counts_elements)
-      l = unique_elements.size
-      percent = 0
-      for i in range(0,l):
-          percent = percent + counts_elements[i]
-          if float(percent) > (float(totalpercent)*0.66):
-              break
-      th=unique_elements[i]
-    
-      Q[Q > th] = 0
-      Q[Q > 0]  = 255
-    
-      closeQ = cv2.morphologyEx(Q, cv2.MORPH_CLOSE, se)
-      cv2.imwrite("roi" + str(index) + ".jpg", closeQ)
-      self.roi_list.append(closeQ)
+    print('Number of chess: '+ str(len(raw_chess_list)))
 
-    label_list = []
-    for i in range(len(chess_list)):
-      X = np.reshape(self.roi_list[i],[1,90,90,1])
-      label_index = self.model_red.predict_classes(X)[0]
-      label_list.append(self.chess_label[label_index])
+    label_list    = []
+    for raw_chess in raw_chess_list:
+      label, bw_chess = ConvoNN.ConvoNN (raw_chess, self.model_red, self.model_black)
+      label_list.append (label)
+      self.chess_list.append (bw_chess)
+
     self.predicted = np.array(label_list).T
 
     chessdata = np.array([self.predicted.T, posX, posY])
-    print(chessdata)
-    posi      = np.array([posX, posY])
-    print(chessdata.shape)
-    m, n = chessdata.shape
 
-    for i in range(len(chess_list)):
+    for i in range(len(self.chess_list)):
       self.tableWidget.setItem(i,0, QTableWidgetItem(self.predicted[i]))
       self.tableWidget.setItem(i,1, QTableWidgetItem(str(posX[i])))
       self.tableWidget.setItem(i,2, QTableWidgetItem(str(posY[i])))
