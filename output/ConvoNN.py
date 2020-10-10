@@ -3,9 +3,11 @@ import numpy as np
 import preprocess
 
 chess_label = ['Cannon', 'Chariot', 'Elephant', 'General', 'Guard', 'Horse', 'Sodier']
+chess_label2 = ['Chariot', 'Elephant', 'General']
 
-def ConvoNN(raw_chess, model_red, model_black):
+def ConvoNN(raw_chess, model_red, model_red2, model_black):
   global chess_label
+  global chess_label2
   b,g,r = cv2.split(raw_chess)
   gb = g-b
   rb = r-b
@@ -24,7 +26,11 @@ def ConvoNN(raw_chess, model_red, model_black):
     bw_chess = preprocess.process (gray, 0.66)
     X = np.reshape(bw_chess,[1,90,90,1])
     label_index = model_red.predict_classes(X)[0]
-    label = 'r' + chess_label[label_index]
+    if (label_index == 1) or (label_index == 2) or (label_index == 3):
+      label_index = model_red2.predict_classes(X)[0]
+      label = 'r' + chess_label2[label_index]
+    else:
+      label = 'r' + chess_label[label_index]
   elif (median_gb > median_rb and median_gb >= 15):
     label = 'Unknown'
     bw = cv2.threshold(gray, 0.38, 255, cv2.THRESH_BINARY)[1]

@@ -12,11 +12,13 @@ def redpreprocess(gray=None):
                    [0,1,1,1,0],
                    [0,0,1,0,0]], np.uint8)
     openbw = cv2.morphologyEx(bw, cv2.MORPH_CLOSE, se)
+  
     mask = np.ones(gray.shape) * openbw
     mask = mask / 255
     mask = mask.astype(np.uint8)
-
+  
     PP = gray * mask
+  
     BW_circle = np.zeros((90, 90))
     BW_circle = cv2.circle(BW_circle, (45, 45), 35, (255, 255, 255), -1)
     BW_circle = BW_circle / 255
@@ -34,9 +36,9 @@ def redpreprocess(gray=None):
         if float(percent) > (float(totalpercent)*0.66):
             break
     th=unique_elements[i]
-
-    Q[Q > th]=0
-    Q[Q > 0]=255
-
-    closeQ = cv2.morphologyEx(Q, cv2.MORPH_CLOSE, se)
-    return closeQ
+  
+    Q[Q > th] = 0
+    Q[Q > 0]  = 255
+  
+    bw_chess = cv2.morphologyEx(Q, cv2.MORPH_CLOSE, se)
+    return bw_chess

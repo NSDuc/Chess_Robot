@@ -28,7 +28,7 @@ def test():
         pass
 
 def calcu_position(predicted,posX,posY):
-    import chesslocation
+    import chesslocation_eng
     L   = np.shape(posX)[0]
     new = np.zeros((L, 3))
     j1  = np.zeros(L).T
@@ -106,7 +106,7 @@ def calcu_position(predicted,posX,posY):
          21, 19, 17, 18, 20, 24, 22, 11, 10, 27, 26,
          33, 16, 12, 15, 13, 14, 32, 28, 31, 29, 30];
     for p in range(0,33):
-         prior[p,:] = chesslocation.matrix[(b[p] - 1),:]
+         prior[p,:] = chesslocation_eng.matrix[(b[p] - 1),:]
     order = np.zeros((L,5))
     index = np.full((L,5), -1)
 

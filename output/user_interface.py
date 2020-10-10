@@ -28,8 +28,10 @@ class MainWindow(QMainWindow):
 
     self.model_red = load_model(r'model_red.h5')
     self.model_black = load_model(r'model_black.h5')
+    self.model_red2 = load_model(r'model_red2.h5')
     self.model_black.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
     self.model_red.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
+    self.model_red2.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
 
     self.chess_list = []
     self.chess     = None
@@ -141,7 +143,7 @@ class MainWindow(QMainWindow):
   def cb_button_recognition(self):
     print("recBtn")
 
-    self.src = cv2.imread(r'Picture 147.jpg')
+    self.src = cv2.imread(r'Picture '+str(sys.argv[1])+'.jpg')
     qformat = QImage.Format_RGB888
     img = QImage(self.src,
                  self.src.shape[1],
@@ -168,7 +170,7 @@ class MainWindow(QMainWindow):
 
     label_list    = []
     for raw_chess in raw_chess_list:
-      label, bw_chess = ConvoNN.ConvoNN (raw_chess, self.model_red, self.model_black)
+      label, bw_chess = ConvoNN.ConvoNN (raw_chess, self.model_red, self.model_red2, self.model_black)
       label_list.append (label)
       self.chess_list.append (bw_chess)
 
@@ -198,7 +200,8 @@ class MainWindow(QMainWindow):
     selc = np.array([6,8,10,11,22,30,34,42,48,51,52,54,62,64,65,72])
     posX = np.array([409,435,460,472,512,553,584,618,645,660,720,730,788,808,823,847]).T
     posY = np.array([555,662,457,353,548,655,428,542,332,674,420,565,677,339,470,594]).T
-    predicted = np.array(["仕","r車","相","傌","炮","兵","炮","相","兵","兵","帥","兵","兵","炮","仕","傌"])
+    # predicted = np.array(["仕","r車","相","傌","炮","兵","炮","相","兵","兵","帥","兵","兵","炮","仕","傌"])
+    predicted = np.array(["rGuard","rChariot","rElephant","rHorse","rCannon","rSoldier","rCannon","rElephant","rSoldier","rSoldier","rGeneral","rSoldier","rSoldier","rCannon","rGuard","rHorse"])
     chess, order, index, prior = robot_arm.calcu_position(predicted, posX, posY)
 
     L         = selc.shape[0]
