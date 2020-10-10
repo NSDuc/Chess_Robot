@@ -9,6 +9,12 @@ def ConvoNN(raw_chess, model_red, model_black):
   b,g,r = cv2.split(raw_chess)
   gb = g-b
   rb = r-b
+  gb = g.astype(np.int)-b.astype(np.int)
+  rb = r.astype(np.int)-b.astype(np.int)
+  gb[gb < 0] = 0
+  gb = gb.astype(np.uint8)
+  rb[rb < 0] = 0
+  rb = rb.astype(np.uint8)
   median_gb = gb.mean()
   median_rb = rb.mean()
   gray = cv2.cvtColor(raw_chess, cv2.COLOR_BGR2GRAY)
