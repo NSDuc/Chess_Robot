@@ -27,8 +27,9 @@ def ConvoNN(raw_chess, model_red, model_red2, model_black):
     X = np.reshape(bw_chess,[1,90,90,1])
     label_index = model_red.predict_classes(X)[0]
     if (label_index == 1) or (label_index == 2) or (label_index == 3):
-      label_index = model_red2.predict_classes(X)[0]
-      label = 'r' + chess_label2[label_index]
+      # label_index = model_red2.predict_classes(X)[0]
+      # label = 'r' + chess_label2[label_index]
+      label = 'r' + chess_label[label_index]
     else:
       label = 'r' + chess_label[label_index]
   elif (median_gb > median_rb and median_gb >= 15):

@@ -1,0 +1,78 @@
+100
+correct
+
+101
+rSoldier | rGeneral
+
+146
+correct
+
+155
+correct
+
+156
+rSoldier | rGeneral
+
+170
+correct
+
+147
+correct
+
+150
+correct
+
+199
+rChariot | rGeneral
+
+167
+correct
+
+168
+rElephant | rGeneral
+
+169
+correct
+
+171
+correct
+
+172
+correct
+
+173
+correct
+
+174
+correct
+
+175
+correct
+
+176
+correct
+
+177
+correct, noise
+
+191
+rSoldier | rGeneral
+
+192
+correct
+
+193
+error
+
+148
+correct, dup
+
+149
+correct, dup
+
+150
+correct
+
+151
+correct
+
