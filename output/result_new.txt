@@ -2,36 +2,81 @@
 correct
 
 101
-rSoldier | rGeneral
+correct
 
 146
+correct
+
+147
+correct
+
+148
+correct, dup
+
+149
+correct, dup
+
+150
+correct
+
+151
+correct
+
+152
+correct
+
+153
+correct
+
+154
 correct
 
 155
 correct
 
 156
-rSoldier | rGeneral
-
-170
 correct
 
-147
+157
 correct
 
-150
+158
 correct
 
-199
-rChariot | rGeneral
+159
+correct
+
+160
+correct
+
+161
+correct
+
+162
+correct
+
+163
+correct
+
+164
+correct
+
+165
+correct, dup
+
+166
+correct
 
 167
 correct
 
 168
-rElephant | rGeneral
+rElephant | rChariot, dup
 
 169
+correct
+
+170
 correct
 
 171
@@ -56,7 +101,7 @@ correct
 correct, noise
 
 191
-rSoldier | rGeneral
+correct
 
 192
 correct
@@ -64,15 +109,6 @@ correct
 193
 error
 
-148
-correct, dup
-
-149
-correct, dup
-
-150
-correct
-
-151
-correct
+199
+rGeneral | rChariot
 
