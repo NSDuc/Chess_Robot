@@ -177,7 +177,11 @@ class MainWindow(QMainWindow):
     self.reset_table()
     self.reset_variable()
 
-    picname = 'Picture '+self.textbox.text()+'.jpg'
+    #cam = cv2.VideoCapture(0)
+    #_ , self.src = cam.read()
+
+    picname = r"F:\_OUTSOURCE\ChessArrange\testimg\Picture " +self.textbox.text()+ ".jpg"
+    print(picname)
     if os.path.exists(picname) == False:
       return
     self.setWindowTitle(picname)
@@ -266,7 +270,8 @@ class MainWindow(QMainWindow):
       tag_check = np.where(prior[curt_tag.astype(np.int),8] == '0')[0]
       tag       = curt_tag[tag_check[0]]
 
-      currentj1, currentj36 = robot_arm.robot_clamp2(chess[sortidx[j],0], chess[sortidx[j],1],chess[sortidx[j],2],chess[sortidx[j],4], currentj1, currentj36)
+      self.currentj1, self.currentj36 = robot_arm.robot_clamp2(
+        chess[sortidx[j],0], chess[sortidx[j],1],chess[sortidx[j],2],chess[sortidx[j],4], self.currentj1, self.currentj36)
       if tag == 23:
         cam = cv2.VideoCapture(0)
         _ , frame2 = cam.read()
@@ -274,13 +279,21 @@ class MainWindow(QMainWindow):
         tx, ty  = turn_catch(frame2)
         turnroi = frame2[tx-50:tx+49,ty-50:ty+49,:]
         roi     = turnroi.astype(np.unit8)
-        predictedLabel[L+1] = ConvoNN(roi)
+        predictedLabel[L+1] = ConvoNN.ConvoNN(roi, self.model_red, self.model_red2, self.model_black)
         predicted[L+1]      = str(predictedLabel[L+1])
         robot_arm.pause(0.1)
+
+        curt_tag  = find(strcmp(predicted(L+1),prior));
+        tag_check = np.where(prior[curt_tag.astype(np.int),8] == '0')[0]
+        tag = curt_tag[tag_check[0]]
+        self.currentj1, self.currentj36 = robot_arm.robot_turn2_2(self.currentj1, self.currentj36);
+        robo_tag[j,:] = prior[int(tag),3:8].astype(np.float)
+
       else:
         robo_tag[j,:] = prior[int(tag),3:8].astype(np.int);
 
-      currentj1, currentj36, check = robot_arm.robot_place2(robo_tag[j,0], robo_tag[j,1], robo_tag[j,2], robo_tag[j,3], robo_tag[j,4], currentj1, currentj36)
+      self.currentj1, self.currentj36, check = robot_arm.robot_place2(
+        robo_tag[j,0], robo_tag[j,1], robo_tag[j,2], robo_tag[j,3], robo_tag[j,4], self.currentj1, self.currentj36)
       prior[int(tag),8] = check
     
   # Button2
