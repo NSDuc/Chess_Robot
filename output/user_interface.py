@@ -180,7 +180,7 @@ class MainWindow(QMainWindow):
     #cam = cv2.VideoCapture(0)
     #_ , self.src = cam.read()
 
-    picname = r"F:\_OUTSOURCE\ChessArrange\testimg\Picture " +self.textbox.text()+ ".jpg"
+    picname = r"E:\robot_arm\nntest-20200914T132455Z-001\nntest\testimg\Picture " +self.textbox.text()+ ".jpg"
     print(picname)
     if os.path.exists(picname) == False:
       return
@@ -219,6 +219,7 @@ class MainWindow(QMainWindow):
       self.chess_list.append (bw_chess)
 
     self.predicted = np.array(label_list).T
+    print(self.predicted)
 
     chessdata = np.array([self.predicted.T, posX, posY])
 
@@ -254,7 +255,6 @@ class MainWindow(QMainWindow):
     robo_tag  = np.zeros((L,5))
     sortidx   = np.argsort(order[:, 0])
     sortchess = order[np.argsort(order[:, 0])]
-
     print(chess)
     print(order)
     print(index)
@@ -264,6 +264,7 @@ class MainWindow(QMainWindow):
     print(robo_tag)
     print(sortidx)
     print(sortchess)
+    hardcode_tag23 = True
     for j in range(L):
       print("j =", j)
       curt_tag  = sortchess[j,np.nonzero(sortchess[j,:])[0]]
@@ -272,15 +273,23 @@ class MainWindow(QMainWindow):
 
       self.currentj1, self.currentj36 = robot_arm.robot_clamp2(
         chess[sortidx[j],0], chess[sortidx[j],1],chess[sortidx[j],2],chess[sortidx[j],4], self.currentj1, self.currentj36)
-      if tag == 23:
-        cam = cv2.VideoCapture(0)
-        _ , frame2 = cam.read()
-
-        tx, ty  = turn_catch(frame2)
+      # if tag == 23:
+        # cam = cv2.VideoCapture(0)
+        # _ , frame2 = cam.read()
+      if tag == 23 and hardcode_tag23 == True:
+        hardcode_tag23 = False
+        frame2  = cv2.imread('Picture 181.jpg')
+        tx, ty  = catch_roi.turn_catch(frame2)
         turnroi = frame2[tx-50:tx+49,ty-50:ty+49,:]
         roi     = turnroi.astype(np.unit8)
-        predictedLabel[L+1] = ConvoNN.ConvoNN(roi, self.model_red, self.model_red2, self.model_black)
-        predicted[L+1]      = str(predictedLabel[L+1])
+        label, bw_chess = ConvoNN.ConvoNN(roi, self.model_red, self.model_red2, self.model_black)
+        cv2.imshow('detected circles',cimg)
+        cv2.waitKey(0)
+        self.predicted[L] = label
+        # self.predicted = np.append(self.predicted, [label])
+        self.tableWidget.setItem(L,0, QTableWidgetItem(self.predicted[L]))
+        self.tableWidget.setItem(L,1, QTableWidgetItem(str(tx)))
+        self.tableWidget.setItem(L,2, QTableWidgetItem(str(ty)))
         robot_arm.pause(0.1)
 
         curt_tag  = find(strcmp(predicted(L+1),prior));
@@ -288,7 +297,6 @@ class MainWindow(QMainWindow):
         tag = curt_tag[tag_check[0]]
         self.currentj1, self.currentj36 = robot_arm.robot_turn2_2(self.currentj1, self.currentj36);
         robo_tag[j,:] = prior[int(tag),3:8].astype(np.float)
-
       else:
         robo_tag[j,:] = prior[int(tag),3:8].astype(np.int);
 

@@ -47,3 +47,37 @@ def catchroi(src):
   cv2.imwrite("dot.jpg",src_clone)
 
   return openbw, chess_list, posX, posY
+
+def turn_catch(src):
+  dy = 500
+  dx = 530
+  src_crop  = src[dy:(dy + 150),dx:(dx + 150)].copy()
+  b,g,r = cv2.split(src_crop)
+  recognition = (0.1*r + 0.1*g + 0.8*b).astype(np.uint8)
+  thresh = threshold_otsu (recognition)
+  _ , bw = cv2.threshold (recognition, thresh*0.72, 255, cv2.THRESH_BINARY)
+
+  bw = 255 - bw
+  se = np.array([[0,0,1,0,0],
+                 [0,1,1,1,0],
+                 [1,1,1,1,1],
+                 [0,1,1,1,0],
+                 [0,0,1,0,0]], np.uint8)
+
+  openbw = cv2.morphologyEx(bw, cv2.MORPH_CLOSE, se)
+
+  contours, hierarchy = cv2.findContours(openbw,  
+    cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+
+  for con in contours:
+    rect = cv2.boundingRect(con)
+    if rect[2] > 70 and rect[3] > 70:
+      regionXb = dx + rect[0]
+      regionXe = dx + rect[0] + rect[2]
+      regionYb = dy + rect[1]
+      regionYe = dy + rect[1] + rect[3]
+      posX = int(rect[0] + rect[2] / 2)
+      posY = int(rect[1] + rect[3] / 2)
+      break
+
+  return posX, posY
