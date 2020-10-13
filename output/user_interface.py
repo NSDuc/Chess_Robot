@@ -221,8 +221,6 @@ class MainWindow(QMainWindow):
     self.predicted = np.array(label_list).T
     print(self.predicted)
 
-    chessdata = np.array([self.predicted.T, posX, posY])
-
     for i in range(len(self.chess_list)):
       self.tableWidget.setItem(i,0, QTableWidgetItem(self.predicted[i]))
       self.tableWidget.setItem(i,1, QTableWidgetItem(str(posX[i])))

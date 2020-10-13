@@ -31,22 +31,29 @@ def catchroi(src):
       regionXe = rect[0] + rect[2]
       regionYb = rect[1]
       regionYe = rect[1] + rect[3]
-      posX_list.append(int(rect[0] + rect[2] / 2))
-      posY_list.append(int(rect[1] + rect[3] / 2))
+      centerX  = int(rect[0] + rect[2] / 2)
+      centerY  = int(rect[1] + rect[3] / 2)
+      if (len(posX_list) > 0) and (centerX == posX_list[-1]) and (centerY == posY_list[-1]):
+        continue
+      posX_list.append(centerX)
+      posY_list.append(centerY)
       sub_image = openbw[regionYb:regionYe,regionXb:regionXe]
       chess_list.append(src[regionYb:regionYe,regionXb:regionXe].copy())
 
   posX = np.array(posX_list).T
   posY = np.array(posY_list).T
 
-  # Mark Position on image
-  blue_dot = [255,0,0]
-  for i in range(len(posX_list)):
-    src_clone[(posY_list[i] - 2):(posY_list[i] + 2),(posX_list[i] - 2):(posX_list[i] + 2)] = blue_dot
+  sort_index = posX.argsort()
+  posX_sort = np.empty_like(sort_index)
+  posY_sort = np.empty_like(sort_index)
+  chess_list_sort = []
 
-  cv2.imwrite("dot.jpg",src_clone)
+  posX_sort[:] = posX[sort_index]
+  posY_sort[:] = posY[sort_index]
+  for index in sort_index:
+    chess_list_sort.append(chess_list[index])
 
-  return openbw, chess_list, posX, posY
+  return openbw, chess_list_sort, posX_sort, posY_sort
 
 def turn_catch(src):
   dy = 500
