@@ -178,7 +178,7 @@ class MainWindow(QMainWindow):
     self.reset_table()
     self.reset_variable()
 
-    if 1:
+    if 1: #apply
       picname = r"F:\_OUTSOURCE\ChessArrange\testimg\Picture " +self.textbox.text()+ ".jpg"
       print(picname)
       if os.path.exists(picname) == False:
@@ -235,9 +235,9 @@ class MainWindow(QMainWindow):
     prior     = self.prior
     predicted = self.predicted
     s         = self.s
-    currentj1   = self.currentj1
-    currentj36  = self.currentj36
-    currentj6   = self.currentj6
+    currentj1  = self.currentj1
+    currentj36 = self.currentj36
+    currentj6  = self.currentj6
 
     # selc = np.array([6,8,10,11,22,30,34,42,48,51,52,54,62,64,65,72])
     # posX = np.array([409,435,460,472,512,553,584,618,645,660,720,730,788,808,823,847]).T
@@ -336,7 +336,7 @@ class MainWindow(QMainWindow):
     print("exitBtn")
     # Disconnect from serial
 
-  def captureFrame(self):
+  def captureFrame(self): #apply
     cam = cv2.VideoCapture(0)
     _, frame = cam.read()
     return frame

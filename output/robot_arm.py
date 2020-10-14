@@ -2,13 +2,13 @@ import numpy as np
 import time
 import serial
 
-def pause(t):
+def pause(t): #apply
     if 1:
         print("pause ", t)
     else:
         time.sleep(t)
 
-def writeSerial(s, data):
+def writeSerial(s, data): #apply
     if 1:
         print(data)
     else:
