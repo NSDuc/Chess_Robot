@@ -180,7 +180,7 @@ class MainWindow(QMainWindow):
     #cam = cv2.VideoCapture(0)
     #_ , self.src = cam.read()
 
-    picname = r"E:\robot_arm\nntest-20200914T132455Z-001\nntest\testimg\Picture " +self.textbox.text()+ ".jpg"
+    picname = r"F:\_OUTSOURCE\ChessArrange\testimg\Picture " +self.textbox.text()+ ".jpg"
     print(picname)
     if os.path.exists(picname) == False:
       return
@@ -225,7 +225,10 @@ class MainWindow(QMainWindow):
       self.tableWidget.setItem(i,0, QTableWidgetItem(self.predicted[i]))
       self.tableWidget.setItem(i,1, QTableWidgetItem(str(posX[i])))
       self.tableWidget.setItem(i,2, QTableWidgetItem(str(posY[i])))
-    self.chess, self.order, self.index, self.prior = calcu_position.calcu_position(self.predicted, posX, posY)
+    self.chess, self.order, self.index, self.prior = calcu_position.calculate(self.predicted, posX, posY)
+    print("posX=", posX)
+    print("posY=", posY)
+    print("predicted=", self.predicted)
 
   # Button6 startBtn
   def cb_button_start(self):

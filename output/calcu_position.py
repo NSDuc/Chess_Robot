@@ -8,7 +8,7 @@ def test():
     posX = np.array([409,435,460,472,512,553,584,618,645,660,720,730,788,808,823,847]).T
     posY = np.array([555,662,457,353,548,655,428,542,332,674,420,565,677,339,470,594]).T
     predicted = np.array(["仕","r車","相","傌","炮","兵","炮","相","兵","兵","帥","兵","兵","炮","仕","傌"])
-    chess, order, index, prior = calcu_position(predicted, posX, posY)
+    chess, order, index, prior = calculate(predicted, posX, posY)
 
     print(prior)
     print()
@@ -27,7 +27,7 @@ def test():
         print("tag=", tag)
         pass
 
-def calcu_position(predicted,posX,posY):
+def calculate(predicted,posX,posY):
     import chesslocation_eng
     L   = np.shape(posX)[0]
     new = np.zeros((L, 3))
