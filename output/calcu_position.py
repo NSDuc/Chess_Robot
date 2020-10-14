@@ -28,7 +28,7 @@ def test():
         pass
 
 def calculate(predicted,posX,posY):
-    import chesslocation_eng
+    import chesslocation
     L   = np.shape(posX)[0]
     new = np.zeros((L, 3))
     j1  = np.zeros(L).T
@@ -101,13 +101,13 @@ def calculate(predicted,posX,posY):
     currentj1  = 0
     currentj36 = 0
     prior = np.zeros((33,9), dtype = object)
-    chess = np.array([j1, j2, j36, j45, j45_rotate]).T
+    chess = np.array([j1, j2, j36, j45, j45_rotate], dtype=np.int).T
     b = [7 , 9 , 5 , 3 , 1 , 2 , 4 , 8 , 6 , 23, 25,
          21, 19, 17, 18, 20, 24, 22, 11, 10, 27, 26,
          33, 16, 12, 15, 13, 14, 32, 28, 31, 29, 30];
     for p in range(0,33):
-         prior[p,:] = chesslocation_eng.matrix[(b[p] - 1),:]
-    order = np.zeros((L,5))
+         prior[p,:] = chesslocation.matrix[(b[p] - 1),:]
+    order = np.full((L,5), -1)
     index = np.full((L,5), -1)
 
     for a in range(0,L):

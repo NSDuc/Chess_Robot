@@ -77,14 +77,16 @@ def turn_catch(src):
     cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
   for con in contours:
-    rect = cv2.boundingRect(con)
-    if rect[2] > 70 and rect[3] > 70:
-      regionXb = dx + rect[0]
-      regionXe = dx + rect[0] + rect[2]
-      regionYb = dy + rect[1]
-      regionYe = dy + rect[1] + rect[3]
-      posX = int(rect[0] + rect[2] / 2)
-      posY = int(rect[1] + rect[3] / 2)
+    x,y,w,h = cv2.boundingRect(con)
+    if w > 70 and h > 70:
+      print(x,y)
+      regionXb = dx + x
+      regionXe = dx + x + w
+      regionYb = dy + y
+      regionYe = dy + y + h
+      print("w,h=", w,h)
+      posX = int(x + w / 2)
+      posY = int(y + h / 2)
       break
 
-  return posX, posY
+  return posX+dy, posY+dx

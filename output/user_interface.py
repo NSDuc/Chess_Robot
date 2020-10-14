@@ -33,6 +33,7 @@ class MainWindow(QMainWindow):
     self.model_red.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
     self.model_red2.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
     self.model_black.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
+    self.s = None
 
     self.reset_variable()
 
@@ -177,18 +178,17 @@ class MainWindow(QMainWindow):
     self.reset_table()
     self.reset_variable()
 
-    #cam = cv2.VideoCapture(0)
-    #_ , self.src = cam.read()
+    if 1:
+      picname = r"F:\_OUTSOURCE\ChessArrange\testimg\Picture " +self.textbox.text()+ ".jpg"
+      print(picname)
+      if os.path.exists(picname) == False:
+        return
+      self.setWindowTitle(picname)
+      src_img = cv2.imread(picname)
+    else: #apply
+      src_img = self.captureFrame()
 
-    picname = r"F:\_OUTSOURCE\ChessArrange\testimg\Picture " +self.textbox.text()+ ".jpg"
-    print(picname)
-    if os.path.exists(picname) == False:
-      return
-    self.setWindowTitle(picname)
-    src_img = cv2.imread(picname)
-    # src_img = cv2.imread(r'Picture '+str(sys.argv[1])+'.jpg')
     self.textbox.setText("")
-
     qformat = QImage.Format_RGB888
     img = QImage(src_img,
                  src_img.shape[1],
@@ -219,16 +219,12 @@ class MainWindow(QMainWindow):
       self.chess_list.append (bw_chess)
 
     self.predicted = np.array(label_list).T
-    print(self.predicted)
 
     for i in range(len(self.chess_list)):
       self.tableWidget.setItem(i,0, QTableWidgetItem(self.predicted[i]))
       self.tableWidget.setItem(i,1, QTableWidgetItem(str(posX[i])))
       self.tableWidget.setItem(i,2, QTableWidgetItem(str(posY[i])))
     self.chess, self.order, self.index, self.prior = calcu_position.calculate(self.predicted, posX, posY)
-    print("posX=", posX)
-    print("posY=", posY)
-    print("predicted=", self.predicted)
 
   # Button6 startBtn
   def cb_button_start(self):
@@ -238,7 +234,7 @@ class MainWindow(QMainWindow):
     index     = self.index
     prior     = self.prior
     predicted = self.predicted
-    # s         = self.s
+    s         = self.s
     currentj1   = self.currentj1
     currentj36  = self.currentj36
     currentj6   = self.currentj6
@@ -249,11 +245,9 @@ class MainWindow(QMainWindow):
     # predicted = np.array(["仕","r車","相","傌","炮","兵","炮","相","兵","兵","帥","兵","兵","炮","仕","傌"])
     # predicted = np.array(["rGuard","rChariot","rElephant","rHorse","rCannon","rSoldier","rCannon","rElephant","rSoldier","rSoldier","rGeneral","rSoldier","rSoldier","rCannon","rGuard","rHorse"])
     # chess, order, index, prior = robot_arm.calcu_position(predicted, posX, posY)
-
-    # L         = selc.shape[0]
     L         = predicted.shape[0]
-    prior     = np.c_[prior, np.zeros((prior.shape[0],1))]
-    robo_tag  = np.zeros((L,5))
+    prior     = np.c_[prior, np.zeros((prior.shape[0],1), dtype=np.int)]
+    robo_tag  = np.zeros((L,5), dtype=np.int)
     sortidx   = np.argsort(order[:, 0])
     sortchess = order[np.argsort(order[:, 0])]
     print(chess)
@@ -262,48 +256,43 @@ class MainWindow(QMainWindow):
     print(prior)
     print(predicted)
     print(L)
-    print(robo_tag)
     print(sortidx)
     print(sortchess)
-    hardcode_tag23 = True
     for j in range(L):
       print("j =", j)
-      curt_tag  = sortchess[j,np.nonzero(sortchess[j,:])[0]]
-      tag_check = np.where(prior[curt_tag.astype(np.int),8] == '0')[0]
-      tag       = curt_tag[tag_check[0]]
+      curt_tag  = sortchess[j,np.argwhere(sortchess[j,:]>=0)]
+      tag_check = np.where(prior[curt_tag,8] == '0')[0]
+      print("tag_check=", tag_check)
+      tag = curt_tag[tag_check[0]]
+      print("tag=", tag)
 
-      self.currentj1, self.currentj36 = robot_arm.robot_clamp2(
+      self.currentj1, self.currentj36 = robot_arm.robot_clamp2(self.s,
         chess[sortidx[j],0], chess[sortidx[j],1],chess[sortidx[j],2],chess[sortidx[j],4], self.currentj1, self.currentj36)
-      # if tag == 23:
-        # cam = cv2.VideoCapture(0)
-        # _ , frame2 = cam.read()
-      if tag == 23 and hardcode_tag23 == True:
-        hardcode_tag23 = False
-        frame2  = cv2.imread('Picture 181.jpg')
-        tx, ty  = catch_roi.turn_catch(frame2)
+      if tag == 23: #[tag == 22 ???]
+        frame2 = self.captureFrame()
+        tx, ty  = catchroi.turn_catch(frame2)
         turnroi = frame2[tx-50:tx+49,ty-50:ty+49,:]
-        roi     = turnroi.astype(np.unit8)
+        roi     = turnroi.astype(np.uint8)
         label, bw_chess = ConvoNN.ConvoNN(roi, self.model_red, self.model_red2, self.model_black)
-        cv2.imshow('detected circles',cimg)
-        cv2.waitKey(0)
-        self.predicted[L] = label
-        # self.predicted = np.append(self.predicted, [label])
+
+        self.predicted = np.append(self.predicted, [label]) #self.predicted[L] = label
+        
         self.tableWidget.setItem(L,0, QTableWidgetItem(self.predicted[L]))
         self.tableWidget.setItem(L,1, QTableWidgetItem(str(tx)))
         self.tableWidget.setItem(L,2, QTableWidgetItem(str(ty)))
         robot_arm.pause(0.1)
 
-        curt_tag  = find(strcmp(predicted(L+1),prior));
-        tag_check = np.where(prior[curt_tag.astype(np.int),8] == '0')[0]
+        curt_tag  = np.where(self.predicted[L+1] == prior)
+        tag_check = np.where(prior[curt_tag,8] == '0')[0]
         tag = curt_tag[tag_check[0]]
-        self.currentj1, self.currentj36 = robot_arm.robot_turn2_2(self.currentj1, self.currentj36);
-        robo_tag[j,:] = prior[int(tag),3:8].astype(np.float)
+        self.currentj1, self.currentj36 = robot_arm.robot_turn2_2(self.s, self.currentj1, self.currentj36);
+        robo_tag[j,:] = prior[tag,3:8].astype(np.int)
       else:
-        robo_tag[j,:] = prior[int(tag),3:8].astype(np.int);
+        robo_tag[j,:] = prior[tag,3:8].astype(np.int)
 
-      self.currentj1, self.currentj36, check = robot_arm.robot_place2(
+      self.currentj1, self.currentj36, check = robot_arm.robot_place2(self.s,
         robo_tag[j,0], robo_tag[j,1], robo_tag[j,2], robo_tag[j,3], robo_tag[j,4], self.currentj1, self.currentj36)
-      prior[int(tag),8] = check
+      prior[tag,8] = check
     
   # Button2
   def cb_button_connect(self):
@@ -346,6 +335,11 @@ class MainWindow(QMainWindow):
   def cb_button_exit(self):
     print("exitBtn")
     # Disconnect from serial
+
+  def captureFrame(self):
+    cam = cv2.VideoCapture(0)
+    _, frame = cam.read()
+    return frame
 
 app = QApplication(sys.argv)
 window = MainWindow()

@@ -3,10 +3,19 @@ import time
 import serial
 
 def pause(t):
-    #print("pause ", t)
-    pass
+    if 1:
+        print("pause ", t)
+    else:
+        time.sleep(t)
 
-def robot_place2(tj1 ,tj2 ,tj36 ,tj45p ,tj45r ,currentj1 ,currentj36):
+def writeSerial(s, data):
+    if 1:
+        print(data)
+    else:
+        s.write(data)
+
+def robot_place2(s, tj1 ,tj2 ,tj36 ,tj45p ,tj45r ,currentj1 ,currentj36):
+    print("\nrobot_place2 start")
     j1 = tj1 - currentj1
     j2 = tj2
     j36 = tj36 - currentj36
@@ -25,25 +34,25 @@ def robot_place2(tj1 ,tj2 ,tj36 ,tj45p ,tj45r ,currentj1 ,currentj36):
     #---------------------------robot run-------------------------------------
     for k in range(7):
         if k == 0:
-            print(joint1_tag)
+            writeSerial(s,joint1_tag)
         elif k == 1:
-            print(joint36_tag)
+            writeSerial(s,joint36_tag)
         elif k == 2:
             if j45r != 0:
-                print(joint45r_tag)
+                writeSerial(s,joint45r_tag)
             else:
-                print(joint45p_tag)
+                writeSerial(s,joint45p_tag)
         elif k == 3:
-            print(joint2_tag)
+            writeSerial(s,joint2_tag)
         elif k == 4:
-            print(gp_op)
+            writeSerial(s,gp_op)
         elif k == 5:
-            print(joint2_tagsi)
+            writeSerial(s,joint2_tagsi)
         else:
             if j45r != 0:
-                print(joint45r_tagi)
+                writeSerial(s,joint45r_tagi)
             else:
-                print(joint45p_tagi)
+                writeSerial(s,joint45p_tagi)
             check = '1'
 
         if k == 0:
@@ -90,7 +99,8 @@ def robot_place2(tj1 ,tj2 ,tj36 ,tj45p ,tj45r ,currentj1 ,currentj36):
     return currentj1,currentj36,check
     
 
-def robot_clamp2 (cj1, cj2, cj36, cj45r, currentj1, currentj36):
+def robot_clamp2 (s, cj1, cj2, cj36, cj45r, currentj1, currentj36):
+    writeSerial(s,"\nrobot_clamp2 start")
     j1 = cj1 - currentj1
     j2 = cj2
     j36 = cj36 - currentj36
@@ -106,19 +116,19 @@ def robot_clamp2 (cj1, cj2, cj36, cj45r, currentj1, currentj36):
 
     for k in range(7):
         if k == 0:
-            print(joint1_chs)
+            writeSerial(s,joint1_chs)
         elif k == 1:
-            print(joint36_chs)
+            writeSerial(s,joint36_chs)
         elif k == 2:
-            print(joint45_chs)
+            writeSerial(s,joint45_chs)
         elif k == 3:
-            print(joint2_chs)
+            writeSerial(s,joint2_chs)
         elif k == 4:
-            print(gp_cl)
+            writeSerial(s,gp_cl)
         elif k == 5:
-            print(joint2_chsi)
+            writeSerial(s,joint2_chsi)
         else:
-            print(joint45_chsi)
+            writeSerial(s,joint45_chsi)
 
         if k == 0:
             if abs(j1) < 1000:
@@ -163,7 +173,7 @@ def robot_clamp2 (cj1, cj2, cj36, cj45r, currentj1, currentj36):
     currentj36 = cj36
     return currentj1, currentj36
 
-def robot_turn2_2 (currentj1, currentj36):
+def robot_turn2_2 (s, currentj1, currentj36):
     recoj1i  = '@STEP 221,-1050,0,0,0,0,0,0'
     recoj2   = '@STEP 221,0,700,0,0,0,0,0'
     recoj2i  = '@STEP 221,0,-700,0,0,0,0,0'
@@ -175,25 +185,25 @@ def robot_turn2_2 (currentj1, currentj36):
     gp_op    = '@STEP 221,0,0,0,0,0,110,0'
     gp_cl    = '@STEP 221,0,0,0,0,0,-110,0'
 
-    print(recoj1i)
+    writeSerial(s,recoj1i)
     pause(6)
-    print(recoj2)
+    writeSerial(s,recoj2)
     pause(4.5)
-    print(gp_op)
+    writeSerial(s,gp_op)
     pause(1.5)
-    print(recoj2i)
+    writeSerial(s,recoj2i)
     pause(4.5)
-    print(rotaj45i)
+    writeSerial(s,rotaj45i)
     pause(4.5)
-    print(turnj45i)
+    writeSerial(s,turnj45i)
     pause(2.5)
-    print(turnj366)
+    writeSerial(s,turnj366)
     pause(3)
-    print(turnj22)
+    writeSerial(s,turnj22)
     pause(3.5)
-    print(gp_cl)
+    writeSerial(s,gp_cl)
     pause(1.5)
-    print(turnj22i)
+    writeSerial(s,turnj22i)
     pause(3.5)
 
     currentj1 = 900
