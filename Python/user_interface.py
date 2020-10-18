@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import serial
 import numpy as np
 import cv2
@@ -178,8 +178,8 @@ class MainWindow(QMainWindow):
     self.reset_table()
     self.reset_variable()
 
-    if 1: #apply
-      picname = r"F:\_OUTSOURCE\ChessArrange\testimg\Picture " +self.textbox.text()+ ".jpg"
+    if 0: #apply
+      picname = r"C:\Users\Vu Trung Hieu\Desktop\chess\nntest\testimg\Picture " +self.textbox.text()+ ".jpg"
       print(picname)
       if os.path.exists(picname) == False:
         return
@@ -293,7 +293,7 @@ class MainWindow(QMainWindow):
       self.currentj1, self.currentj36, check = robot_arm.robot_place2(self.s,
         robo_tag[j,0], robo_tag[j,1], robo_tag[j,2], robo_tag[j,3], robo_tag[j,4], self.currentj1, self.currentj36)
       prior[tag,8] = check
-    
+
   # Button2
   def cb_button_connect(self):
     print("connectBtn")
@@ -310,12 +310,12 @@ class MainWindow(QMainWindow):
     print("robotOnBtn")
     if self.robotOnBtn.isChecked():
       print("Robot on")
-      self.s.write('@STEP 221,0,0,0,0,0,430,0')
+      self.s.write('@STEP 221,0,0,0,0,0,430,0\r\n'.encode('ascii'))
       self.currentj6 = 430
       self.robotOnBtn.setText("Robot off")
     else:
       print("Robot off")
-      self.s.write('@STEP 221,0,0,0,0,0,-430,0')
+      self.s.write('@STEP 221,0,0,0,0,0,-430,0\r\n'.encode('ascii'))
       currentj6 = 0
       self.robotOnBtn.setText("Robot on")
 
@@ -338,6 +338,8 @@ class MainWindow(QMainWindow):
 
   def captureFrame(self): #apply
     cam = cv2.VideoCapture(0)
+    cam.set(3,1280)
+    cam.set(4,960)
     _, frame = cam.read()
     return frame
 

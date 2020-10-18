@@ -3,16 +3,16 @@ import time
 import serial
 
 def pause(t): #apply
-    if 1:
+    if 0:
         print("pause ", t)
     else:
         time.sleep(t)
 
 def writeSerial(s, data): #apply
-    if 1:
+    if 0:
         print(data)
     else:
-        s.write(data)
+        s.write((data+"\r\n").encode("ascii"))
 
 def robot_place2(s, tj1 ,tj2 ,tj36 ,tj45p ,tj45r ,currentj1 ,currentj36):
     print("\nrobot_place2 start")

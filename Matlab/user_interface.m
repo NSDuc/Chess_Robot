@@ -88,13 +88,14 @@ function pushbutton1_Callback(hObject, ~, handles)
 % handles    structure with handles and user data (see GUIDATA)
 global frame1
 load camera;
-set(hObject, 'String','processing');
-handles.cam1 = webcam(1);
-handles.cam1.Resolution = '1280x960';
-frame1 = snapshot(handles.cam1);
+% set(hObject, 'String','processing');
+% handles.cam1 = webcam(1);
+% handles.cam1.Resolution = '1280x960';
+% frame1 = snapshot(handles.cam1);
+frame1 = imread("D:\Project\ChessRobot\nntest\testimg\Picture150.jpg");
 frame1 = undistortImage(frame1,cameraParams);
 %frame1 = imadjust(frame1,[],[],1);
-delete(handles.cam1);
+% delete(handles.cam1);
 axes(handles.axes1);
 imshow(frame1);
 clear cam1;
@@ -158,7 +159,7 @@ if strcmp(get(hObject,'String'),'connect')
     s = serial('COM1','BaudRate',9600,'DataBits', 8,'Terminator','CR');
     try
         fopen(s);
-        handles.s = s;
+%         handles.s = s;
         set(hObject, 'String','disconnect');
     catch e
         errordlg(e.message);
