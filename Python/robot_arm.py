@@ -2,15 +2,17 @@ import numpy as np
 import time
 import serial
 
+import test_param
+
 def pause(t): #apply
-    if 0:
+    if test_param.print_pause:
         print("pause ", t)
     else:
         time.sleep(t)
 
 def writeSerial(s, data): #apply
-    if 0:
-        print(data)
+    if test_param.print_serial:
+        print(s.port + ": " + data)
     else:
         s.write((data+"\r\n").encode("ascii"))
 

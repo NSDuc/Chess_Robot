@@ -14,6 +14,72 @@ import ConvoNN
 import robot_arm
 
 import os
+import time, threading
+import re
+
+import test_param
+
+com_robot  = 'COM1'
+com_matlab = 'COM3'
+no_camera  = True
+first_read = True
+test_param.init()
+
+position_regex = re.compile(r'(.*),(.*),(.*),(.*),(.*),(.*),(.*)')
+
+matlab_serial          = serial.Serial()
+matlab_serial.port     = com_matlab
+matlab_serial.baudrate = 9600
+matlab_serial.bytesize = 8
+matlab_serial.parity   = 'N'
+matlab_serial.stopbits = 1
+
+robot_serial          = serial.Serial()
+robot_serial.port     = com_robot
+robot_serial.baudrate = 9600
+robot_serial.bytesize = 8
+robot_serial.parity   = 'N'
+# robot_serial.stopbits = 1
+
+def read_robot_position():
+  global position_regex
+  global robot_serial
+  global matlab_serial
+  global first_read
+
+  if first_read == True:
+    first_read = False
+    threading.Timer(1, read_robot_position).start()
+    return
+
+  print(time.ctime())
+
+  if matlab_serial.is_open == False:
+    try:
+      matlab_serial.open()
+      print("Connected to matlab")
+    except:
+      print("Not connect to matlab")
+      threading.Timer(1, read_robot_position).start()
+      return
+
+  if robot_serial.is_open == False:
+    print("Not connect to robot")
+  else:
+    print("Waiting data from robot...")
+    robot_arm.writeSerial(robot_serial, '@READ')
+    line = robot_serial.readline().decode('ascii')
+    ## Sample to test on Hercules: 1,2,-294.0,0,0,-294.0,0#010#013
+    print(line)
+    match = position_regex.search(line)
+    if match == None:
+      print("Not match format")
+    else:
+      robot_arm.writeSerial(matlab_serial, line)
+
+  threading.Timer(1, read_robot_position).start()
+  return
+
 class Color(QWidget):
   def __init__(self, color, *args, **kwargs):
     super(Color, self).__init__(*args, **kwargs)
@@ -33,7 +99,6 @@ class MainWindow(QMainWindow):
     self.model_red.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
     self.model_red2.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
     self.model_black.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
-    self.s = None
 
     self.reset_variable()
 
@@ -178,7 +243,7 @@ class MainWindow(QMainWindow):
     self.reset_table()
     self.reset_variable()
 
-    if 0: #apply
+    if test_param.import_picture: #apply
       picname = r"C:\Users\Vu Trung Hieu\Desktop\chess\nntest\testimg\Picture " +self.textbox.text()+ ".jpg"
       print(picname)
       if os.path.exists(picname) == False:
@@ -228,13 +293,14 @@ class MainWindow(QMainWindow):
 
   # Button6 startBtn
   def cb_button_start(self):
+    global robot_serial
+
     print("startBtn")
     chess     = self.chess
     order     = self.order
     index     = self.index
     prior     = self.prior
     predicted = self.predicted
-    s         = self.s
     currentj1  = self.currentj1
     currentj36 = self.currentj36
     currentj6  = self.currentj6
@@ -266,7 +332,7 @@ class MainWindow(QMainWindow):
       tag = curt_tag[tag_check[0]]
       print("tag=", tag)
 
-      self.currentj1, self.currentj36 = robot_arm.robot_clamp2(self.s,
+      self.currentj1, self.currentj36 = robot_arm.robot_clamp2(robot_serial,
         chess[sortidx[j],0], chess[sortidx[j],1],chess[sortidx[j],2],chess[sortidx[j],4], self.currentj1, self.currentj36)
       if tag == 23: #[tag == 22 ???]
         frame2 = self.captureFrame()
@@ -285,37 +351,49 @@ class MainWindow(QMainWindow):
         curt_tag  = np.where(self.predicted[L+1] == prior)
         tag_check = np.where(prior[curt_tag,8] == '0')[0]
         tag = curt_tag[tag_check[0]]
-        self.currentj1, self.currentj36 = robot_arm.robot_turn2_2(self.s, self.currentj1, self.currentj36);
+        self.currentj1, self.currentj36 = robot_arm.robot_turn2_2(robot_serial, self.currentj1, self.currentj36);
         robo_tag[j,:] = prior[tag,3:8].astype(np.int)
       else:
         robo_tag[j,:] = prior[tag,3:8].astype(np.int)
 
-      self.currentj1, self.currentj36, check = robot_arm.robot_place2(self.s,
+      self.currentj1, self.currentj36, check = robot_arm.robot_place2(robot_serial,
         robo_tag[j,0], robo_tag[j,1], robo_tag[j,2], robo_tag[j,3], robo_tag[j,4], self.currentj1, self.currentj36)
       prior[tag,8] = check
 
   # Button2
   def cb_button_connect(self):
+    global robot_serial
+    global matlab_serial
+
     print("connectBtn")
     if self.connectBtn.isChecked():
-      print("Connect")
-      self.s = serial.Serial('COM1', 9600, bytesize=8, parity='N', stopbits=1)
-      self.connectBtn.setText("Disconnect")
+      try:
+        robot_serial.open()
+        print("Connected to robot")
+        self.connectBtn.setText("Disconnect")
+        read_robot_position()
+      except:
+        print("Cannot connect to robot")
+        self.connectBtn.setChecked(False)
+        return
     else:
+       robot_serial.close()
        print("Disconnect")
        self.connectBtn.setText("Connect")
 
   # Button7
   def cb_button_robot(self):
+    global robot_serial
+
     print("robotOnBtn")
     if self.robotOnBtn.isChecked():
       print("Robot on")
-      self.s.write('@STEP 221,0,0,0,0,0,430,0\r\n'.encode('ascii'))
+      robot_arm.writeSerial(robot_serial, '@STEP 221,0,0,0,0,0,430,0')
       self.currentj6 = 430
       self.robotOnBtn.setText("Robot off")
     else:
       print("Robot off")
-      self.s.write('@STEP 221,0,0,0,0,0,-430,0\r\n'.encode('ascii'))
+      robot_arm.writeSerial(robot_serial, '@STEP 221,0,0,0,0,0,-430,0')
       currentj6 = 0
       self.robotOnBtn.setText("Robot on")
 
@@ -333,7 +411,14 @@ class MainWindow(QMainWindow):
 
   # Button5
   def cb_button_exit(self):
+    global robot_serial
+    global matlab_serial
+
     print("exitBtn")
+    robot_serial.close()
+    matlab_serial.close()
+    self.close()
+    sys.exit(0)
     # Disconnect from serial
 
   def captureFrame(self): #apply
