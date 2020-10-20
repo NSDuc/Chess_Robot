@@ -16,6 +16,20 @@ def writeSerial(s, data): #apply
     else:
         s.write((data+"\r\n").encode("ascii"))
 
+def readSerial(s):
+    eol = b'\r'
+    line = ""
+    while True:
+        c = s.read()
+        if c:
+            if c == eol:
+                break
+            else:
+                line += c.decode('ascii')
+        else:
+            break
+    return line
+
 def robot_place2(s, tj1 ,tj2 ,tj36 ,tj45p ,tj45r ,currentj1 ,currentj36):
     print("\nrobot_place2 start")
     j1 = tj1 - currentj1

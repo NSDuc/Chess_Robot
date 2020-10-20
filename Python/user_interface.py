@@ -68,7 +68,7 @@ def read_robot_position():
   else:
     print("Waiting data from robot...")
     robot_arm.writeSerial(robot_serial, '@READ')
-    line = robot_serial.readline().decode('ascii')
+    line = robot_arm.readSerial(robot_serial)
     ## Sample to test on Hercules: 1,2,-294.0,0,0,-294.0,0#010#013
     print(line)
     match = position_regex.search(line)
