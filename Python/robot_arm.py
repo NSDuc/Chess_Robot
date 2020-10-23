@@ -20,9 +20,8 @@ def writeSerial(robot, matlab, data, p=2): #apply
         print("writeSerial: " + data)
     else:
         robot.write((data + ", 0\r").encode("ascii"))
-        pause(p/2)
         matlab.write((data + ", " + str(p) + ', ' + str(seq) + ", 0\r").encode("ascii"))
-        pause(p/2)
+        pause(2)
         seq += 1
         if (seq == 1000):
             seq = 0

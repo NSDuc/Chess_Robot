@@ -245,7 +245,7 @@ class MainWindow(QMainWindow):
     self.reset_variable()
 
     if test_param.import_picture: #apply
-      picname = r"E:\robot_arm\nntest-20200914T132455Z-001\nntest\testimg\Picture " +self.textbox.text()+ ".jpg"
+      picname = r"D:\Project\ChessRobot\nntest\testimg\Picture " +self.textbox.text()+ ".jpg"
       print(picname)
       if os.path.exists(picname) == False:
         return
@@ -397,12 +397,12 @@ class MainWindow(QMainWindow):
     print("robotOnBtn")
     if self.robotOnBtn.isChecked():
       print("Robot on")
-      robot_arm.writeSerial(robot_serial, matlab_serial, '@STEP 221, 0, 0, 0, 0, 0, 430')
+      robot_arm.writeSerial(robot_serial, matlab_serial, '@STEP 221, 0, 0, 0, 0, 0, 430', 2)
       self.currentj6 = 430
       self.robotOnBtn.setText("Robot off")
     else:
       print("Robot off")
-      robot_arm.writeSerial(robot_serial, matlab_serial, '@STEP 221, 0, 0, 0, 0, 0, -430')
+      robot_arm.writeSerial(robot_serial, matlab_serial, '@STEP 221, 0, 0, 0, 0, 0, -430', 2)
       currentj6 = 0
       self.robotOnBtn.setText("Robot on")
 

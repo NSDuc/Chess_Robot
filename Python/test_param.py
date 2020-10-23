@@ -4,5 +4,5 @@ def init():
   global print_serial
 
   import_picture = True
-  print_pause    = True
+  print_pause    = False
   print_serial   = False
