@@ -10,11 +10,15 @@ def pause(t): #apply
     else:
         time.sleep(t)
 
-def writeSerial(s, data): #apply
+def writeSerial(robot, matlab, data, p=2): #apply
     if test_param.print_serial:
-        print(s.port + ": " + data)
+        print("writeSerial: " + data)
     else:
-        s.write((data+"\r\n").encode("ascii"))
+        robot.write((data+"\r").encode("ascii"))
+        pause(p/2)
+        matlab.write((data+"\r").encode("ascii"))
+        pause(p/2)
+
 
 def readSerial(s):
     eol = b'\r'
@@ -30,7 +34,7 @@ def readSerial(s):
             break
     return line
 
-def robot_place2(s, tj1 ,tj2 ,tj36 ,tj45p ,tj45r ,currentj1 ,currentj36):
+def robot_place2(robot, matlab, tj1 ,tj2 ,tj36 ,tj45p ,tj45r ,currentj1 ,currentj36):
     print("\nrobot_place2 start")
     j1 = tj1 - currentj1
     j2 = tj2
@@ -48,75 +52,61 @@ def robot_place2(s, tj1 ,tj2 ,tj36 ,tj45p ,tj45r ,currentj1 ,currentj36):
     joint45r_tagi= '@STEP 221,0,0,0,' + str(- j45r) + ',' + str(j45r) + ',0,0'
     gp_op= '@STEP 221,0,0,0,0,0,110,0'
     #---------------------------robot run-------------------------------------
-    for k in range(7):
-        if k == 0:
-            writeSerial(s,joint1_tag)
-        elif k == 1:
-            writeSerial(s,joint36_tag)
-        elif k == 2:
-            if j45r != 0:
-                writeSerial(s,joint45r_tag)
-            else:
-                writeSerial(s,joint45p_tag)
-        elif k == 3:
-            writeSerial(s,joint2_tag)
-        elif k == 4:
-            writeSerial(s,gp_op)
-        elif k == 5:
-            writeSerial(s,joint2_tagsi)
-        else:
-            if j45r != 0:
-                writeSerial(s,joint45r_tagi)
-            else:
-                writeSerial(s,joint45p_tagi)
-            check = '1'
 
-        if k == 0:
-            if abs(j1) < 1000:
-                pause(5.5)
-            else:
-                u1 = 0.5*(np.round((abs(j1)-1000),-1)/100) + 5.5
-                pause(u1)
-        elif k == 1:
-            if abs(j36) <= 200:
-                pause(2)
-            else:
-                u2 = 0.5*(np.round((abs(j36)-200),-1)/100) + 2
-                pause(u2)
-        elif k == 2:
-            if abs(j45r) <= 150:
-                pause(1.5)
-            else:
-                u4 = 0.3*(np.round((abs(j45r)-150),-1)/50) + 1.5
-                pause(u4)
-        elif k == 3:
-            if j2 <= 250:
-                pause(2.5)
-            else:
-                u4 = 1*(np.round((j2-250),-1)/250) + 2.5
-                pause(u4)
-        elif k == 5:
-            if j2 <= 250:
-                pause(2.5)
-            else:
-                u6 = 1*(np.round((j2-250),-1)/250) + 2.5
-                pause(u6)
-        elif k == 6:
-            if abs(j45r) <= 150:
-                pause(1.5)
-            else:
-                u4 = 0.3*(np.round((abs(j45r)-150),-1)/50) + 1.5
-                pause(u4)
-        else:
-            pause(1.5)
+    if abs(j1) < 1000:
+        p = 5.5
+    else:
+        p = 0.5*(np.round((abs(j1)-1000),-1)/100) + 5.5
+    writeSerial(robot, matlab, joint1_tag, p)
+
+    if abs(j36) <= 200:
+        p = 2
+    else:
+        p = 0.5*(np.round((abs(j36)-200),-1)/100) + 2
+    writeSerial(robot, matlab, joint36_tag, p)
+
+    if abs(j45r) <= 150:
+        p = 1.5
+    else:
+        p = 0.3*(np.round((abs(j45r)-150),-1)/50) + 1.5
+    if j45r != 0:
+        writeSerial(robot, matlab, joint45r_tag, p)
+    else:
+        writeSerial(robot, matlab, joint45p_tag, p)
+
+    if j2 <= 250:
+        p = 2.5
+    else:
+        p = 1*(np.round((j2-250),-1)/250) + 2.5
+    writeSerial(robot, matlab, joint2_tag, p)
+
+    p = 1.5
+    writeSerial(robot, matlab, gp_op, p)
+
+    if j2 <= 250:
+        p = 2.5
+    else:
+        p = 1*(np.round((j2-250),-1)/250) + 2.5
+    writeSerial(robot, matlab, joint2_tagsi, p)
+
+    if abs(j45r) <= 150:
+        p = 1.5
+    else:
+        p = 0.3*(np.round((abs(j45r)-150),-1)/50) + 1.5
+    if j45r != 0:
+        writeSerial(robot, matlab, joint45r_tagi, p)
+    else:
+        writeSerial(robot, matlab, joint45p_tagi, p)
+
+    check = '1'
     
     currentj1  = tj1
     currentj36 = tj36
     return currentj1,currentj36,check
     
 
-def robot_clamp2 (s, cj1, cj2, cj36, cj45r, currentj1, currentj36):
-    writeSerial(s,"\nrobot_clamp2 start")
+def robot_clamp2 (robot, matlab, cj1, cj2, cj36, cj45r, currentj1, currentj36):
+    # writeSerial(s,"\nrobot_clamp2 start")
     j1 = cj1 - currentj1
     j2 = cj2
     j36 = cj36 - currentj36
@@ -130,66 +120,50 @@ def robot_clamp2 (s, cj1, cj2, cj36, cj45r, currentj1, currentj36):
     joint45_chsi = '@STEP 221,0,0,0,' + str(-j45) + ',' + str(j45) + ',0,0'
     gp_cl = '@STEP 221,0,0,0,0,0,-110,0'
 
-    for k in range(7):
-        if k == 0:
-            writeSerial(s,joint1_chs)
-        elif k == 1:
-            writeSerial(s,joint36_chs)
-        elif k == 2:
-            writeSerial(s,joint45_chs)
-        elif k == 3:
-            writeSerial(s,joint2_chs)
-        elif k == 4:
-            writeSerial(s,gp_cl)
-        elif k == 5:
-            writeSerial(s,joint2_chsi)
-        else:
-            writeSerial(s,joint45_chsi)
+    if abs(j1) < 1000:
+        p = 5.5
+    else:
+        p = 0.5*(np.round((abs(j1)-1000),-1)/100) + 5.5
+    writeSerial(robot, matlab, joint1_chs, p)
 
-        if k == 0:
-            if abs(j1) < 1000:
-                pause(5.5)
-            else:
-                u1 = 0.5*(np.round((abs(j1)-1000),-1)/100) + 5.5
-                pause(u1)
-        elif k == 1:
-            if abs(j36) <= 200:
-                pause(2)
-            else:
-                u2 = 0.5*(np.round((abs(j36)-200),-1)/100) + 2
-                pause(u2)
-        elif k == 2:
-            if abs(j45) <= 150:
-                pause(1.5);
-            else:
-                u4 = 0.3*(np.round((abs(j45)-150),-1)/50) + 1.5
-                pause(u4)
-        elif k == 3:
-            if j2 <= 250:
-                pause(2.5)
-            else:
-                u4 = 1*(np.round((j2-250),-1)/250) + 2.5
-                pause(u4)
-        elif k == 5:
-            if j2 <= 250:
-                pause(2.5)
-            else:
-                u6 = 1*(np.round((j2-250),-1)/250) + 2.5
-                pause(u6)
-        elif k == 6:
-            if abs(j45) <= 150:
-                pause(1.5)
-            else:
-                u4 = 0.3*(np.round((abs(j45)-150),-1)/50) + 1.5
-                pause(u4)
-        else:
-            pause(1.5)
+    if abs(j36) <= 200:
+        p = 2
+    else:
+        p = 0.5*(np.round((abs(j36)-200),-1)/100) + 2
+    writeSerial(robot, matlab, joint36_chs, p)
+
+    if abs(j45) <= 150:
+        p = 1.5
+    else:
+        p = 0.3*(np.round((abs(j45)-150),-1)/50) + 1.5
+    writeSerial(robot, matlab, joint45_chs, p)
+
+    if j2 <= 250:
+        p =2.5
+    else:
+        p = 1*(np.round((j2-250),-1)/250) + 2.5
+    writeSerial(robot, matlab, joint2_chs, p)
+
+    p = 1.5
+    writeSerial(robot, matlab, gp_cl, p)
+
+    if j2 <= 250:
+        p = 2.5
+    else:
+        p = 1*(np.round((j2-250),-1)/250) + 2.5
+    writeSerial(robot, matlab, joint2_chsi, p)
+
+    if abs(j45) <= 150:
+        p = 1.5
+    else:
+        p = 0.3*(np.round((abs(j45)-150),-1)/50) + 1.5
+    writeSerial(robot, matlab, joint45_chsi, p)
 
     currentj1 = cj1
     currentj36 = cj36
     return currentj1, currentj36
 
-def robot_turn2_2 (s, currentj1, currentj36):
+def robot_turn2_2 (robot, matlab, currentj1, currentj36):
     recoj1i  = '@STEP 221,-1050,0,0,0,0,0,0'
     recoj2   = '@STEP 221,0,700,0,0,0,0,0'
     recoj2i  = '@STEP 221,0,-700,0,0,0,0,0'
@@ -201,26 +175,16 @@ def robot_turn2_2 (s, currentj1, currentj36):
     gp_op    = '@STEP 221,0,0,0,0,0,110,0'
     gp_cl    = '@STEP 221,0,0,0,0,0,-110,0'
 
-    writeSerial(s,recoj1i)
-    pause(6)
-    writeSerial(s,recoj2)
-    pause(4.5)
-    writeSerial(s,gp_op)
-    pause(1.5)
-    writeSerial(s,recoj2i)
-    pause(4.5)
-    writeSerial(s,rotaj45i)
-    pause(4.5)
-    writeSerial(s,turnj45i)
-    pause(2.5)
-    writeSerial(s,turnj366)
-    pause(3)
-    writeSerial(s,turnj22)
-    pause(3.5)
-    writeSerial(s,gp_cl)
-    pause(1.5)
-    writeSerial(s,turnj22i)
-    pause(3.5)
+    writeSerial(robot, matlab, recoj1i, 6)
+    writeSerial(robot, matlab, recoj2, 4.5)
+    writeSerial(robot, matlab, gp_op, 1.5)
+    writeSerial(robot, matlab, recoj2i, 4.5)
+    writeSerial(robot, matlab, rotaj45i, 4.5)
+    writeSerial(robot, matlab, turnj45i, 2.5)
+    writeSerial(robot, matlab, turnj366, 3)
+    writeSerial(robot, matlab, turnj22, 3.5)
+    writeSerial(robot, matlab, gp_cl, 1.5)
+    writeSerial(robot, matlab, turnj22i, 3.5)
 
     currentj1 = 900
     currentj36 = -410

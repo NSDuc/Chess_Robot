@@ -67,7 +67,7 @@ def read_robot_position():
     print("Not connect to robot")
   else:
     print("Waiting data from robot...")
-    robot_arm.writeSerial(robot_serial, '@READ')
+    robot_arm.writeSerial(robot_serial, matlab_serial, '@READ')
     line = robot_arm.readSerial(robot_serial)
     ## Sample to test on Hercules: 1,2,-294.0,0,0,-294.0,0#010#013
     print(line)
@@ -244,7 +244,7 @@ class MainWindow(QMainWindow):
     self.reset_variable()
 
     if test_param.import_picture: #apply
-      picname = r"C:\Users\Vu Trung Hieu\Desktop\chess\nntest\testimg\Picture " +self.textbox.text()+ ".jpg"
+      picname = r"E:\robot_arm\nntest-20200914T132455Z-001\nntest\testimg\Picture " +self.textbox.text()+ ".jpg"
       print(picname)
       if os.path.exists(picname) == False:
         return
@@ -332,7 +332,7 @@ class MainWindow(QMainWindow):
       tag = curt_tag[tag_check[0]]
       print("tag=", tag)
 
-      self.currentj1, self.currentj36 = robot_arm.robot_clamp2(robot_serial,
+      self.currentj1, self.currentj36 = robot_arm.robot_clamp2(robot_serial, matlab_serial,
         chess[sortidx[j],0], chess[sortidx[j],1],chess[sortidx[j],2],chess[sortidx[j],4], self.currentj1, self.currentj36)
       if tag == 23: #[tag == 22 ???]
         frame2 = self.captureFrame()
@@ -351,12 +351,13 @@ class MainWindow(QMainWindow):
         curt_tag  = np.where(self.predicted[L+1] == prior)
         tag_check = np.where(prior[curt_tag,8] == '0')[0]
         tag = curt_tag[tag_check[0]]
-        self.currentj1, self.currentj36 = robot_arm.robot_turn2_2(robot_serial, self.currentj1, self.currentj36);
+        self.currentj1, self.currentj36 = robot_arm.robot_turn2_2(robot_serial, matlab_serial,
+          self.currentj1, self.currentj36);
         robo_tag[j,:] = prior[tag,3:8].astype(np.int)
       else:
         robo_tag[j,:] = prior[tag,3:8].astype(np.int)
 
-      self.currentj1, self.currentj36, check = robot_arm.robot_place2(robot_serial,
+      self.currentj1, self.currentj36, check = robot_arm.robot_place2(robot_serial, matlab_serial,
         robo_tag[j,0], robo_tag[j,1], robo_tag[j,2], robo_tag[j,3], robo_tag[j,4], self.currentj1, self.currentj36)
       prior[tag,8] = check
 
@@ -371,13 +372,20 @@ class MainWindow(QMainWindow):
         robot_serial.open()
         print("Connected to robot")
         self.connectBtn.setText("Disconnect")
-        read_robot_position()
+        # read_robot_position()
       except:
         print("Cannot connect to robot")
         self.connectBtn.setChecked(False)
-        return
+        sys.exit(0)
+      try:
+        matlab_serial.open()
+        print("Connected to matlab")
+      except:
+        print("Cannot connect to matlab")
+        sys.exit(0)
     else:
        robot_serial.close()
+       matlab_serial.close()
        print("Disconnect")
        self.connectBtn.setText("Connect")
 
@@ -388,12 +396,12 @@ class MainWindow(QMainWindow):
     print("robotOnBtn")
     if self.robotOnBtn.isChecked():
       print("Robot on")
-      robot_arm.writeSerial(robot_serial, '@STEP 221,0,0,0,0,0,430,0')
+      robot_arm.writeSerial(robot_serial, matlab_serial, '@STEP 221,0,0,0,0,0,430,0')
       self.currentj6 = 430
       self.robotOnBtn.setText("Robot off")
     else:
       print("Robot off")
-      robot_arm.writeSerial(robot_serial, '@STEP 221,0,0,0,0,0,-430,0')
+      robot_arm.writeSerial(robot_serial, matlab_serial, '@STEP 221,0,0,0,0,0,-430,0')
       currentj6 = 0
       self.robotOnBtn.setText("Robot on")
 
