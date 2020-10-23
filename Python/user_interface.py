@@ -26,6 +26,7 @@ first_read = True
 test_param.init()
 
 position_regex = re.compile(r'(.*),(.*),(.*),(.*),(.*),(.*),(.*)')
+robot_arm.init_sequence()
 
 matlab_serial          = serial.Serial()
 matlab_serial.port     = com_matlab
@@ -396,12 +397,12 @@ class MainWindow(QMainWindow):
     print("robotOnBtn")
     if self.robotOnBtn.isChecked():
       print("Robot on")
-      robot_arm.writeSerial(robot_serial, matlab_serial, '@STEP 221,0,0,0,0,0,430,0')
+      robot_arm.writeSerial(robot_serial, matlab_serial, '@STEP 221, 0, 0, 0, 0, 0, 430')
       self.currentj6 = 430
       self.robotOnBtn.setText("Robot off")
     else:
       print("Robot off")
-      robot_arm.writeSerial(robot_serial, matlab_serial, '@STEP 221,0,0,0,0,0,-430,0')
+      robot_arm.writeSerial(robot_serial, matlab_serial, '@STEP 221, 0, 0, 0, 0, 0, -430')
       currentj6 = 0
       self.robotOnBtn.setText("Robot on")
 
