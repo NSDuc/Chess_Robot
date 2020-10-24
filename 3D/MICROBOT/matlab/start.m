@@ -19,14 +19,6 @@ while 1
             header = out(1:5);
             if strcmpi(header, '@STEP')
                step = strsplit(out(7:(l - 4)), ', ');
-               step(2)
-               step(3)
-               step(4)
-               step(5)
-               step(6)
-               step(7)
-               step(8)
-               step(9)
                set_param('MICROBOT_1/step1', 'Value', num2str(step{2}));
                set_param('MICROBOT_1/step2', 'Value', num2str(step{3}));
                set_param('MICROBOT_1/step3', 'Value', num2str(step{4}));

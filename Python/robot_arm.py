@@ -122,7 +122,7 @@ def robot_clamp2 (robot, matlab, cj1, cj2, cj36, cj45r, currentj1, currentj36):
     joint1_chs   = '@STEP 221, ' + str(j1) + ', 0, 0, 0, 0, 0'
     joint2_chs   = '@STEP 221, 0, ' + str(j2) + ', 0, 0, 0, 0'
     joint2_chsi  = '@STEP 221, 0, ' + str(-j2) + ', 0, 0, 0, 0'
-    joint36_chs  = '@STEP 221, 0, 0,' + str(j36) + ', 0, 0, ' + str(j36)
+    joint36_chs  = '@STEP 221, 0, 0, ' + str(j36) + ', 0, 0, ' + str(j36)
     joint45_chs  = '@STEP 221, 0, 0, 0, ' + str(j45) + ', ' + str(-j45) + ', 0'
     joint45_chsi = '@STEP 221, 0, 0, 0, ' + str(-j45) + ', ' + str(j45) + ', 0'
     gp_cl = '@STEP 221, 0, 0, 0, 0, 0, -110'
