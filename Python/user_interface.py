@@ -245,7 +245,7 @@ class MainWindow(QMainWindow):
     self.reset_variable()
 
     if test_param.import_picture: #apply
-      picname = r"D:\Project\ChessRobot\nntest\testimg\Picture " +self.textbox.text()+ ".jpg"
+      picname = r"E:\robot_arm\nntest-20200914T132455Z-001\nntest\testimg\Picture " +self.textbox.text()+ ".jpg"
       print(picname)
       if os.path.exists(picname) == False:
         return
@@ -317,28 +317,38 @@ class MainWindow(QMainWindow):
     robo_tag  = np.zeros((L,5), dtype=np.int)
     sortidx   = np.argsort(order[:, 0])
     sortchess = order[np.argsort(order[:, 0])]
+    print("chess")
     print(chess)
+    print("order")
     print(order)
+    print("index")
     print(index)
+    print("prior")
     print(prior)
+    print("predicted")
     print(predicted)
+    print("L")
     print(L)
+    print("sortidx")
     print(sortidx)
+    print("sortchess")
     print(sortchess)
     for j in range(L):
       print("j =", j)
 
-      # curt_tag  = sortchess[j,np.argwhere(sortchess[j,:]>=0)]
-      # tag_check = np.where(prior[curt_tag,8] == '0')[0]
-      # print("tag_check=", tag_check)
-      # tag = curt_tag[tag_check[0]]
+      curt_tag  = sortchess[j,np.argwhere(sortchess[j,:]>=0)]
+      print("curt_tag=",curt_tag)
+      print("prior[curt_tag,8]=",prior[curt_tag,8])
+      tag_check = np.where(prior[curt_tag,8] == '0')[0]
+      print("tag_check=", tag_check)
+      tag = curt_tag[tag_check[0]]
 
-      sortchess_column = np.nonzero(sortchess[j,:])
-      tag = int(sortchess[j,0])
-      for column in sortchess_column[0]:
-        tag = int(sortchess[j,column])
-        if prior[tag,8] == '0':
-          break
+      # sortchess_column = np.nonzero(sortchess[j,:])
+      # tag = int(sortchess[j,0])
+      # for column in sortchess_column[0]:
+      #   tag = int(sortchess[j,column])
+      #   if prior[tag,8] == '0':
+      #     break
       print("tag=", tag)
 
       self.currentj1, self.currentj36 = robot_arm.robot_clamp2(robot_serial, matlab_serial,
