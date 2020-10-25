@@ -2,7 +2,6 @@
 import serial
 import numpy as np
 import cv2
-from keras.models import load_model
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore  import *
@@ -93,13 +92,6 @@ class Color(QWidget):
 class MainWindow(QMainWindow):
   def __init__(self, *args, **kwargs):
     super(MainWindow, self).__init__(*args, **kwargs)
-
-    self.model_red = load_model(r'model_red.h5')
-    self.model_red2 = load_model(r'model_red2.h5')
-    self.model_black = load_model(r'model_black.h5')
-    self.model_red.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
-    self.model_red2.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
-    self.model_black.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
 
     self.reset_variable()
 
@@ -245,7 +237,8 @@ class MainWindow(QMainWindow):
     self.reset_variable()
 
     if test_param.import_picture: #apply
-      picname = r"E:\robot_arm\nntest-20200914T132455Z-001\nntest\testimg\Picture " +self.textbox.text()+ ".jpg"
+      #picname = r"E:\robot_arm\nntest-20200914T132455Z-001\nntest\testimg\Picture " +self.textbox.text()+ ".jpg"
+      picname = r"F:\nntest\testimg\Picture " +self.textbox.text()+ ".jpg"
       print(picname)
       if os.path.exists(picname) == False:
         return
@@ -280,7 +273,7 @@ class MainWindow(QMainWindow):
 
     label_list = []
     for raw_chess in self.raw_chess_list:
-      label, bw_chess = ConvoNN.ConvoNN (raw_chess, self.model_red, self.model_red2, self.model_black)
+      label, bw_chess = ConvoNN.ConvoNN (raw_chess)
       label_list.append (label)
       self.chess_list.append (bw_chess)
 
@@ -358,7 +351,7 @@ class MainWindow(QMainWindow):
         tx, ty  = catchroi.turn_catch(frame2)
         turnroi = frame2[tx-50:tx+49,ty-50:ty+49,:]
         roi     = turnroi.astype(np.uint8)
-        label, bw_chess = ConvoNN.ConvoNN(roi, self.model_red, self.model_red2, self.model_black)
+        label, bw_chess = ConvoNN.ConvoNN(roi)
 
         self.predicted = np.append(self.predicted, [label]) #self.predicted[L] = label
         

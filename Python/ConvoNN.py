@@ -1,11 +1,14 @@
 import cv2
 import numpy as np
 import preprocess
+import cnn.train as train
 
-chess_label = ['Cannon', 'Chariot', 'Elephant', 'General', 'Guard', 'Horse', 'Soldier']
 chess_label2 = ['Chariot', 'Elephant', 'General', 'Soldier']
 
-def ConvoNN(raw_chess, model_red, model_red2, model_black):
+model_red = train.load_cnn("./cnn/red1.pth")
+model_black = train.load_cnn("./cnn/black.pth")
+
+def ConvoNN(raw_chess):
   global chess_label
   global chess_label2
   b,g,r = cv2.split(raw_chess)
@@ -24,20 +27,12 @@ def ConvoNN(raw_chess, model_red, model_red2, model_black):
 
   if (median_rb > median_gb and median_rb >= 5):
     bw_chess = preprocess.process (gray, 0.66)
-    X = np.reshape(bw_chess,[1,90,90,1])
-    label_index = model_red.predict_classes(X)[0]
-    if (label_index == 3) or (label_index == 1):
-      label_index = model_red2.predict_classes(X)[0]
-      label = 'r' + chess_label2[label_index]
-    else:
-      label = 'r' + chess_label[label_index]
+    label = 'r' + train.predict(model_red, bw_chess)
   elif (median_gb > median_rb and median_gb >= 15):
     label = 'Unknown'
     bw = cv2.threshold(gray, 0.38, 255, cv2.THRESH_BINARY)[1]
     bw_chess = 255 - bw
   else:
     bw_chess = preprocess.process (gray, 0.65)
-    X = np.reshape(bw_chess,[1,90,90,1])
-    label_index = model_black.predict_classes(X)[0]
-    label = 'b' + chess_label[label_index]
+    label = 'b' + train.predict(model_black, bw_chess)
   return label, bw_chess
