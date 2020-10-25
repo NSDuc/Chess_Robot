@@ -17,3 +17,7 @@ red.pth  : train with data_red + 10 epoch
 red0.pth : train with data_red_2 + 10 epoch
 red1.pth : train with data_red + 20 epoch
 red2.pth : train with data_red_2 + 20 epoch
+
+
+black.pth  : train with data_black + 10 epoch
+black1.pth : train with data_black + 20 epoch

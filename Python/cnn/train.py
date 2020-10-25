@@ -59,7 +59,7 @@ def predict(model, cvimage):
 if __name__ == '__main__':
 
     # red black
-    COLOR = "red"
+    COLOR = "black"
 
     # True False
     TRAIN = False
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     else: 
         MODEL_PATH = 'black1.pth'
         TEST_SIZE = 17
-        EPOCH = 10
+        EPOCH = 20
 
     DATA_PATH = "data_" + COLOR
     TEST_PATH = "data_" + COLOR + "_test/"
