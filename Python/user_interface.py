@@ -346,7 +346,7 @@ class MainWindow(QMainWindow):
 
       self.currentj1, self.currentj36 = robot_arm.robot_clamp2(robot_serial, matlab_serial,
         chess[sortidx[j],0], chess[sortidx[j],1],chess[sortidx[j],2],chess[sortidx[j],4], self.currentj1, self.currentj36)
-      if tag == 23: #[tag == 22 ???]
+      if tag == 22:
         frame2 = self.captureFrame()
         tx, ty  = catchroi.turn_catch(frame2)
         turnroi = frame2[tx-50:tx+49,ty-50:ty+49,:]

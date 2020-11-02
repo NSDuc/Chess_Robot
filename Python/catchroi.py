@@ -26,7 +26,7 @@ def catchroi(src):
   posY_list  = []
   for con in contours:
     rect = cv2.boundingRect(con)
-    if rect[2] > 70 and rect[3] > 70:
+    if rect[2] > 70 and rect[3] > 70 and rect[2] < 110 and rect[3] < 110:
       regionXb = rect[0]
       regionXe = rect[0] + rect[2]
       regionYb = rect[1]
