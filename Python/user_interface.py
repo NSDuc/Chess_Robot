@@ -285,11 +285,7 @@ class MainWindow(QMainWindow):
       self.tableWidget.setItem(i,2, QTableWidgetItem(str(posY[i])))
     self.chess, self.order, self.index, self.prior = calcu_position.calculate(self.predicted, posX, posY)
 
-  # Button6 startBtn
-  def cb_button_start(self):
-    global robot_serial
-
-    print("startBtn")
+  def robot_work(self):
     chess     = self.chess
     order     = self.order
     index     = self.index
@@ -373,6 +369,20 @@ class MainWindow(QMainWindow):
         robo_tag[j,0], robo_tag[j,1], robo_tag[j,2], robo_tag[j,3], robo_tag[j,4], self.currentj1, self.currentj36)
       prior[tag,8] = check
 
+  # Button6 startBtn
+  def cb_button_start(self):
+    global robot_serial
+
+    print("startBtn")
+
+    test_param.stop_cond.acquire()
+    test_param.is_stop = False
+    test_param.stop_cond.release()
+
+    th = threading.Thread(target=self.robot_work, args=())
+    th.daemon = True
+    th.start()
+
   # Button2
   def cb_button_connect(self):
     global robot_serial
@@ -422,10 +432,19 @@ class MainWindow(QMainWindow):
     print("stopBtn")
     if self.stopBtn.isChecked():
        print("Stop")
+
+       test_param.stop_cond.acquire()
+       test_param.is_stop = True
+       test_param.stop_cond.release()
        # Stop the whole program to wait for user pressing button again
        self.stopBtn.setText("Continue")
+
     else:
        print("Continue")
+       test_param.stop_cond.acquire()
+       test_param.is_stop = False
+       test_param.stop_cond.notify()
+       test_param.stop_cond.release()
        self.stopBtn.setText("Stop")
 
 

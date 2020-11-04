@@ -1,6 +1,7 @@
 import numpy as np
 import time
 import serial
+import threading
 
 import test_param
 
@@ -16,15 +17,21 @@ def pause(t): #apply
 
 def writeSerial(robot, matlab, data, p=2): #apply
     global seq
+
+    test_param.stop_cond.acquire()
+    while test_param.is_stop == True:
+        test_param.stop_cond.wait()
+    test_param.stop_cond.release()
+
     if test_param.print_serial:
         print("writeSerial: " + data)
     else:
         robot.write((data + ", 0\r").encode("ascii"))
         matlab.write((data + ", " + str(p) + ', ' + str(seq) + ", 0\r").encode("ascii"))
-        pause(p)
         seq += 1
         if (seq == 1000):
             seq = 0
+    pause(p)
 
 
 def readSerial(s):
