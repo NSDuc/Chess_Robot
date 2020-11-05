@@ -238,7 +238,8 @@ class MainWindow(QMainWindow):
 
     if test_param.import_picture: #apply
       #picname = r"E:\robot_arm\nntest-20200914T132455Z-001\nntest\testimg\Picture " +self.textbox.text()+ ".jpg"
-      picname = r"F:\nntest\testimg\Picture " +self.textbox.text()+ ".jpg"
+      # picname = r"F:\nntest\testimg\Picture " +self.textbox.text()+ ".jpg"
+      picname = r"D:\Project\ChessRobot\nntest\testimg\Picture " + self.textbox.text() + ".jpg"
       print(picname)
       if os.path.exists(picname) == False:
         return
@@ -246,6 +247,7 @@ class MainWindow(QMainWindow):
       src_img = cv2.imread(picname)
     else: #apply
       src_img = self.captureFrame()
+      # cv2.imwrite(r"C:\Users\Vu Trung Hieu\Documents\GitHub\Picture 205.jpg", src_img)
 
     self.textbox.setText("")
     qformat = QImage.Format_RGB888
@@ -344,6 +346,7 @@ class MainWindow(QMainWindow):
         chess[sortidx[j],0], chess[sortidx[j],1],chess[sortidx[j],2],chess[sortidx[j],4], self.currentj1, self.currentj36)
       if tag == 22:
         frame2 = self.captureFrame()
+        # cv2.imwrite(r"C:\Users\Vu Trung Hieu\Documents\GitHub\Picture turn_catch.jpg", frame2)
         tx, ty  = catchroi.turn_catch(frame2)
         turnroi = frame2[tx-50:tx+49,ty-50:ty+49,:]
         roi     = turnroi.astype(np.uint8)

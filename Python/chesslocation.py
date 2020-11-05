@@ -33,5 +33,5 @@ matrix = np.array([
 	["rSoldier" ,827   ,487  ,2226  ,330  ,-250  ,0    ,115  ,0],
 	["rSoldier" ,826   ,686  ,2118  ,550  ,-460  ,0    ,90   ,0],
 	["rSoldier" ,823   ,888  ,2046  ,1030 ,-800  ,-25  ,0    ,0],
-	["Unkown"   , "missing" , "missing", "missing", "missing", "missing", "missing", "missing",0]
+	["Unknown"   , "missing" , "missing", "missing", "missing", "missing", "missing", "missing",0]
 ])

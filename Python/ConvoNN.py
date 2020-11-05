@@ -5,8 +5,8 @@ import cnn.train as train
 
 chess_label2 = ['Chariot', 'Elephant', 'General', 'Soldier']
 
-model_red = train.load_cnn("./cnn/red1.pth")
-model_black = train.load_cnn("./cnn/black1.pth")
+model_red = train.load_cnn2("./cnn/redA.pth")
+model_black = train.load_cnn2("./cnn/blackA.pth")
 
 def ConvoNN(raw_chess):
   global chess_label
