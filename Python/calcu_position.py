@@ -68,8 +68,8 @@ def calculate(predicted,posX,posY):
         
         new1 = new.copy()
         nxy1 = nxy.copy()
-        rx1  = nxy1[0,0]
-        ry1  = nxy1[0,1]
+        rx1  = nxy1[i,0]
+        ry1  = nxy1[i,1]
         
         srctheta2 = 41.3
         srctheta3 = -89
