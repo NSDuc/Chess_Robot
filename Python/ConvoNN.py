@@ -27,12 +27,12 @@ def ConvoNN(raw_chess):
 
   if (median_rb > median_gb and median_rb >= 5):
     bw_chess = preprocess.process (gray, 0.66)
-    label = 'r' + train.predict(model_red, bw_chess)
+    label = train.predict(model_red, bw_chess, 'r')
   elif (median_gb > median_rb and median_gb >= 15):
     label = 'Unknown'
     bw = cv2.threshold(gray, 0.38, 255, cv2.THRESH_BINARY)[1]
     bw_chess = 255 - bw
   else:
     bw_chess = preprocess.process (gray, 0.65)
-    label = 'b' + train.predict(model_black, bw_chess)
+    label = train.predict(model_black, bw_chess, 'b')
   return label, bw_chess

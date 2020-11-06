@@ -76,7 +76,8 @@ class Net2(nn.Module):
 
 
 TRAN_TO_TENSOR = transforms.ToTensor()
-LABEL_MAPS = ["Cannon", "Chariot", "Elephant", "General", "Guard", "Horse", "Soldier"]
+LABEL_MAPS_RED = ["炮 rCannon", "俥 rChariot", "相 rElephant", "帥 rGeneral", "仕 rGuard", "傌 rHorse", "兵 rSoldier"]
+LABEL_MAPS_BLACK = ["包 bCannon", "車 bChariot", "象 bElephant", "將 bGeneral", "士 bGuard", "馬 bHorse", "卒 bSoldier"]
 
 def load_cnn(path):
     model = Net()
@@ -87,12 +88,15 @@ def load_cnn2(path):
     model.load_state_dict(torch.load(path))
     return model
 
-def predict(model, cvimage):
+def predict(model, cvimage, color):
     ptimage = TRAN_TO_TENSOR(cvimage).unsqueeze(0)
 
     outputs, auxq = model(ptimage)
     _, predicted = torch.max(outputs, 1)
-    return LABEL_MAPS[predicted]
+    if color == 'r':
+        return LABEL_MAPS_RED[predicted]
+    elif color == 'b':
+        return LABEL_MAPS_BLACK[predicted]
 
 if __name__ == '__main__':
 

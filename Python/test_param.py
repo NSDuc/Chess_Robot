@@ -7,9 +7,9 @@ def init():
   global is_stop
   global stop_cond
 
-  import_picture = True
-  print_pause    = True
-  print_serial   = True
+  import_picture = False
+  print_pause    = False
+  print_serial   = False
 
   is_stop = False
   stop_cond = threading.Condition()
