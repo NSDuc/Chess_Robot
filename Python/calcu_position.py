@@ -112,6 +112,10 @@ def calculate(predicted,posX,posY):
 
     for a in range(0,L):
         w = np.where(predicted[a] == prior[:,0])[0]
+        if len(w) == 0:
+            w = np.array([22, 22, 22, 22, 22])
+        print("w=")
+        print(w)
         k = w.size
         order[a,0:k] = w;
         index[a,0:k] = w;

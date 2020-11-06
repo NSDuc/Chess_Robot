@@ -111,12 +111,10 @@ def robot_place2(robot, matlab, tj1 ,tj2 ,tj36 ,tj45p ,tj45r ,currentj1 ,current
         writeSerial(robot, matlab, joint45r_tagi, p)
     else:
         writeSerial(robot, matlab, joint45p_tagi, p)
-
-    check = '1'
     
     currentj1  = tj1
     currentj36 = tj36
-    return currentj1,currentj36,check
+    return currentj1,currentj36
     
 
 def robot_clamp2 (robot, matlab, cj1, cj2, cj36, cj45r, currentj1, currentj36):
@@ -202,4 +200,51 @@ def robot_turn2_2 (robot, matlab, currentj1, currentj36):
 
     currentj1 = 900
     currentj36 = -410
+    return currentj1, currentj36
+
+
+def robot_turn_2 (robot, matlab, currentj1, currentj36):
+    j1 = -(currentj1 - 900)
+    j36 = -(currentj36 + 400)
+
+    turnj1   = '@STEP 221, ' + str(j1) + ', 0, 0, 0, 0, 0, 0'
+    recoj1   = '@STEP 221, 1050, 0, 0, 0, 0, 0, 0'
+    turnj2   = '@STEP 221, 0, 510, 0, 0, 0, 0, 0'
+    turnj2i  = '@STEP 221, 0, -510, 0, 0, 0, 0, 0'
+    recoj2   = '@STEP 221, 0, 700, 0, 0, 0, 0, 0'
+    recoj2i  = '@STEP 221, 0, -700, 0, 0, 0, 0, 0'
+    oj36     = '@STEP 221, 0, 0, ' + str(j36) + ', 0, 0, ' + str(j36) + ', 0'
+    turnj36i = '@STEP 221, 0, 0, 380, 0, 0, 380, 0'
+    turnj45  = '@STEP 221, 0, 0, 0, -340, -340, 0, 0'
+    rotaj45  = '@STEP 221, 0, 0, 0, -770, 770, 0, 0'
+    gp_op    = '@STEP 221, 0, 0, 0, 0, 0, 110, 0'
+    gp_cl    = '@STEP 221, 0, 0, 0, 0, 0, -110, 0'
+
+    if abs(j1) < 1000:
+        p = 5.5
+    else:
+        p = 0.5*(round((abs(j1)-1000),-1)/100) + 5.5
+    writeSerial(robot, matlab, turnj1, p)
+    if abs(j36) <= 200:
+        p = 2
+    else:
+        p = 0.5*(round((abs(j36)-200),-1)/100) + 2
+    writeSerial(robot, matlab, oj36, p)
+    writeSerial(robot, matlab, turnj2, 3.5)
+    writeSerial(robot, matlab, gp_op, 1.5)
+    writeSerial(robot, matlab, turnj2i, 3.5)
+    writeSerial(robot, matlab, turnj36i, 3)
+    writeSerial(robot, matlab, turnj45, 2.5)
+    writeSerial(robot, matlab, recoj2, 4.5)
+    writeSerial(robot, matlab, gp_cl, 1.5)
+    writeSerial(robot, matlab, recoj2i, 4.5)
+    writeSerial(robot, matlab, rotaj45, 4.5)
+    writeSerial(robot, matlab, recoj2, 4.5)
+    writeSerial(robot, matlab, gp_op, 1.5)
+    writeSerial(robot, matlab, gp_cl, 1.5)
+    writeSerial(robot, matlab, recoj2i, 4.5)
+    writeSerial(robot, matlab, recoj1, 6)
+
+    currentj1 = 1050
+    currentj36 = -20
     return currentj1, currentj36

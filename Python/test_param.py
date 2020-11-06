@@ -9,7 +9,7 @@ def init():
 
   import_picture = True
   print_pause    = False
-  print_serial   = False
+  print_serial   = True
 
   is_stop = False
   stop_cond = threading.Condition()
