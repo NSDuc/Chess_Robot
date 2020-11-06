@@ -260,7 +260,7 @@ class MainWindow(QMainWindow):
     self.label1.setPixmap(QPixmap.fromImage(img).scaledToWidth(360))
     self.label1.setAlignment(Qt.AlignCenter)
 
-    openbw, self.raw_chess_list, posX, posY = catchroi.catchroi (src_img)
+    openbw, self.raw_chess_list, posX, posY = catchroi.detect_roi (src_img)
     qformat = QImage.Format_Indexed8
     img = QImage(openbw,
                  openbw.shape[1],
