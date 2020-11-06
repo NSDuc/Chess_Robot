@@ -114,8 +114,10 @@ def calculate(predicted, posX, posY):
     order = np.full((L, 5), -1)
     index = np.full((L, 5), -1)
 
-    for a in range(0, L):
-        w = np.where(predicted[a] == prior[:, 0])[0]
+    for a in range(0,L):
+        w = np.where(predicted[a] == prior[:,0])[0]
+        if len(w) == 0:
+            w = np.array([22, 22, 22, 22, 22])
         k = w.size
         order[a, 0:k] = w;
         index[a, 0:k] = w;

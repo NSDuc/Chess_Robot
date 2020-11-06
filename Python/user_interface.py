@@ -333,13 +333,6 @@ class MainWindow(QMainWindow):
       tag_check = np.where(prior[curt_tag,8] == '0')[0]
       print("tag_check=", tag_check)
       tag = curt_tag[tag_check[0]]
-
-      # sortchess_column = np.nonzero(sortchess[j,:])
-      # tag = int(sortchess[j,0])
-      # for column in sortchess_column[0]:
-      #   tag = int(sortchess[j,column])
-      #   if prior[tag,8] == '0':
-      #     break
       print("tag=", tag)
 
       self.currentj1, self.currentj36 = robot_arm.robot_clamp2(robot_serial, matlab_serial,
@@ -347,28 +340,42 @@ class MainWindow(QMainWindow):
       if tag == 22:
         frame2 = self.captureFrame()
         cv2.imwrite(r"C:\Users\Vu Trung Hieu\Documents\GitHub\Picture TC_1.jpg", frame2)
+        self.currentj1, self.currentj36 = robot_arm.robot_turn_2(robot_serial, matlab_serial,
+          self.currentj1, self.currentj36);
+
+        if test_param.import_picture:
+          picname = r"E:\robot_arm\nntest-20200914T132455Z-001\nntest\testimg\Picture 188.jpg"
+          frame2 = cv2.imread(picname)
+        else:
+          frame2 = self.captureFrame()
+          cv2.imwrite(r"C:\Users\Vu Trung Hieu\Documents\GitHub\Picture TC_1.jpg", frame2)
         tx, ty  = catchroi.turn_catch(frame2)
         turnroi = frame2[tx-50:tx+49,ty-50:ty+49,:]
         roi     = turnroi.astype(np.uint8)
         label, bw_chess = ConvoNN.ConvoNN(roi)
 
         self.predicted = np.append(self.predicted, [label]) #self.predicted[L] = label
-        
+        self.raw_chess_list.append (turnroi)
+        self.chess_list.append (bw_chess)
+
         self.tableWidget.setItem(L,0, QTableWidgetItem(self.predicted[L]))
         self.tableWidget.setItem(L,1, QTableWidgetItem(str(tx)))
         self.tableWidget.setItem(L,2, QTableWidgetItem(str(ty)))
         robot_arm.pause(0.1)
 
-        curt_tag  = np.where(self.predicted[L+1] == prior)
+        curt_tag  = sortchess[j,np.argwhere(sortchess[j,:]>=0)]
         tag_check = np.where(prior[curt_tag,8] == '0')[0]
         tag = curt_tag[tag_check[0]]
         self.currentj1, self.currentj36 = robot_arm.robot_turn2_2(robot_serial, matlab_serial,
           self.currentj1, self.currentj36);
         robo_tag[j,:] = prior[tag,3:8].astype(np.int)
+        L += 1
+        check = '0'
       else:
         robo_tag[j,:] = prior[tag,3:8].astype(np.int)
+        check = '1'
 
-      self.currentj1, self.currentj36, check = robot_arm.robot_place2(robot_serial, matlab_serial,
+      self.currentj1, self.currentj36 = robot_arm.robot_place2(robot_serial, matlab_serial,
         robo_tag[j,0], robo_tag[j,1], robo_tag[j,2], robo_tag[j,3], robo_tag[j,4], self.currentj1, self.currentj36)
       prior[tag,8] = check
 
