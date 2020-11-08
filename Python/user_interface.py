@@ -350,20 +350,20 @@ class MainWindow(QMainWindow):
           frame2 = self.captureFrame()
           cv2.imwrite(r"C:\Users\Vu Trung Hieu\Documents\GitHub\Picture TC_1.jpg", frame2)
         tx, ty  = catchroi.turn_catch(frame2)
-        turnroi = frame2[tx-50:tx+49,ty-50:ty+49,:]
+        turnroi = frame2[tx-50:tx+49,ty-50:ty+49].copy()
         roi     = turnroi.astype(np.uint8)
         label, bw_chess = ConvoNN.ConvoNN(roi)
 
         self.predicted = np.append(self.predicted, [label]) #self.predicted[L] = label
-        self.raw_chess_list.append (turnroi)
-        self.chess_list.append (bw_chess)
+        self.raw_chess_list.append(turnroi)
+        self.chess_list.append(bw_chess)
 
         self.tableWidget.setItem(L,0, QTableWidgetItem(self.predicted[L]))
         self.tableWidget.setItem(L,1, QTableWidgetItem(str(tx)))
         self.tableWidget.setItem(L,2, QTableWidgetItem(str(ty)))
         robot_arm.pause(0.1)
 
-        curt_tag  = sortchess[j,np.argwhere(sortchess[j,:]>=0)]
+        curt_tag = np.where(self.predicted[L] == prior[:,0])[0]
         tag_check = np.where(prior[curt_tag,8] == '0')[0]
         tag = curt_tag[tag_check[0]]
         self.currentj1, self.currentj36 = robot_arm.robot_turn2_2(robot_serial, matlab_serial,
