@@ -56,8 +56,8 @@ def catchroi(src):
   return openbw, chess_list_sort, posX_sort, posY_sort
 
 def turn_catch(src):
-  dy = 500
-  dx = 530
+  dy = 540
+  dx = 490
   src_crop  = src[dy:(dy + 150),dx:(dx + 150)].copy()
   b,g,r = cv2.split(src_crop)
   recognition = (0.1*r + 0.1*g + 0.8*b).astype(np.uint8)
