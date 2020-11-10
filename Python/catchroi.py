@@ -156,38 +156,31 @@ def detect_roi(original):
 
 
 def detect_turned_roi(frame):
-  DX = 500
-  DY = 530
-  cropframe = frame[DX:(DX + 150),DY:(DY + 150)].copy()
-  # imshow('crop', cropframe)
-  b, g, r   = cv2.split(cropframe)
-  recog  = (0.1*r + 0.1*g + 0.8*b).astype(np.uint8)
-  thresh = threshold_otsu (recog)
-  _ , bw = cv2.threshold (recog, thresh*0.72, 255, cv2.THRESH_BINARY_INV)
+  Xc, Yc = 590, 640
+  DX1, DX2, DY1, DY2 = Xc-100, Xc+100, Yc-100, Yc+100
 
-  se = np.array([[0,0,1,0,0],
-                 [0,1,1,1,0],
-                 [1,1,1,1,1],
-                 [0,1,1,1,0],
-                 [0,0,1,0,0]], np.uint8)
+  cropframe  = frame[DX1:DX2, DY1:DY2, :].copy()
+  cropframe2 = cropframe.copy()
+  # b, g, r = cv2.split(cropframe)
+  # recogn  = (0.1*r + 0.1*g + 0.8*b).astype(np.uint8)
 
-  closebw = cv2.morphologyEx(bw, cv2.MORPH_CLOSE, se)
+  gray   = cv2.cvtColor (cropframe, cv2.COLOR_BGR2GRAY)
+  recogn = cv2.Canny (gray, 20, 120)
+  # imshow("recogn", recogn)
+  circles = cv2.HoughCircles (recogn, cv2.HOUGH_GRADIENT, 1, 40,
+                              param1=128,param2=50,minRadius=20,maxRadius=60)
+  # circles = cv2.HoughCircles(recogn, cv2.HOUGH_GRADIENT, 1, 100,
+  #                            param1=100,param2=90,minRadius=30,maxRadius=70)
 
-  labels = measure.label(closebw)
-  props  = measure.regionprops(labels)
 
-  for prop in props:
-    minr, minc, maxr, maxc = prop.bbox
-    width  = maxr - minr
-    length = maxc - minc
+  circles = np.round (circles[0, :]).astype(np.int)
+  for (x, y, r) in circles:
+    # cv2.circle (cropframe2, (x,y), r, (0, 0, 100), 1)
+    # imshow('cropframe2', cropframe2)
+    roi = cropframe[y-r:y+r, x-r:x+r]
+    # imshow('roi', roi)
 
-    if (width>70) and (length>70):
-      # subimg = cropframe[minr:maxr, minc:maxc].copy()
-      # imshow('subimg', subimg)
-      # print(DX+minr, DX+minc, DY+maxr, DY+maxc)
-      break
-
-  return  DX+minr, DX+maxr, DY+minc, DY+maxc
+  return roi
 
 def test():
   picname = r"F:\nntest\testimg\Picture 205.jpg"
@@ -200,16 +193,23 @@ def test():
 
 
 def test_detect_turned_roi():
-  for x in range(180, 184):
-    picname = r"F:\nntest\testimg\Picture " + str(x) + ".jpg"
-    frame   = cv2.imread(picname)
-    x1, x2, y1, y2  = detect_turned_roi(frame)
-    # turnroi = frame[tx-dx:tx+dx,ty-dy:ty+dy,:]
-    turnroi = frame[x1:x2, y1:y2, :]
-    roi     = turnroi.astype(np.uint8)
+  picnames = [ 
+    r"F:\nntest\testimg\Picture 180.jpg",
+    r"F:\nntest\testimg\Picture 181.jpg",
+    r"F:\nntest\testimg\Picture 182.jpg",
+    r"F:\nntest\testimg\Picture 183.jpg",
+    r"F:\nntest\testimg\Picture 184.jpg",
+    r"F:\nntest\testimg\Picture TC_11.jpg",
+    r"F:\nntest\testimg\Picture TC_12.jpg"]
+  for picname in picnames:
+    frame = cv2.imread (picname)
+    roi = detect_turned_roi(frame)
     imshow('roi', roi)
+
     label, bw_chess = ConvoNN.ConvoNN(roi)
     print(label)
+
+
 
 def imshow(name, image):
   cv2.imshow(name, image)

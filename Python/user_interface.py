@@ -351,10 +351,8 @@ class MainWindow(QMainWindow):
           cv2.imwrite(r"C:\Users\Vu Trung Hieu\Documents\GitHub\Picture TC_1.jpg", frame2)
         # tx, ty  = catchroi.turn_catch(frame2)
         # turnroi = frame2[tx-50:tx+49,ty-50:ty+49,:]
-        x1, x2, y1, y2  = catchroi.detect_turned_roi(frame2)
-        turnroi = frame2[x1:x2, y1:y2, :]
-
-        roi     = turnroi.astype(np.uint8)
+        roi = catchroi.detect_turned_roi(frame2)
+        
         label, bw_chess = ConvoNN.ConvoNN(roi)
 
         self.predicted = np.append(self.predicted, [label]) #self.predicted[L] = label
