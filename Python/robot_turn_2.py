@@ -1,4 +1,5 @@
 import serial
+import time
 
 def robot_turn_2 (s, currentj1, currentj36):
 	j1 = -(currentj1 - 900)
@@ -24,59 +25,59 @@ def robot_turn_2 (s, currentj1, currentj36):
 	        s.write(oj36)
 	    elif k == 2:
 	        s.write(turnj2)
-	        pause(3.5)
+	        time.sleep(3.5)
 	    elif k == 3:
 	        s.write(gp_op)
-	        pause(1.5)
+	        time.sleep(1.5)
 	    elif k == 4:
 	        s.write(turnj2i)
-	        pause(3.5)
+	        time.sleep(3.5)
 	    elif k == 5:
 	        s.write(turnj36i)
-	        pause(3);
+	        time.sleep(3);
 	    elif k == 6:
 	        s.write(turnj45)
-	        pause(2.5)
+	        time.sleep(2.5)
 	    elif k == 7:
 	        s.write(recoj2)
-	        pause(4.5)
+	        time.sleep(4.5)
 	    elif k == 8:
 	        s.write(gp_cl)
-	        pause(1.5)
+	        time.sleep(1.5)
 	    elif k == 9:
 	        s.write(recoj2i)
-	        pause(4.5)
+	        time.sleep(4.5)
 	    elif k == 10:
 	        s.write(rotaj45)
-	        pause(4.5)
+	        time.sleep(4.5)
 	    elif k == 11:
 	        s.write(recoj2)
-	        pause(4.5)
+	        time.sleep(4.5)
 	    elif k == 12:
 	        s.write(gp_op)
-	        pause(1.5)
+	        time.sleep(1.5)
 	    elif k == 13:
 	        s.write(gp_cl)
-	        pause(1.5)
+	        time.sleep(1.5)
 	    elif k == 14:
 	        s.write(recoj2i)
-	        pause(4.5)
+	        time.sleep(4.5)
 	    else:
 	        s.write(recoj1)
-	        pause(6)
+	        time.sleep(6)
 
 	    if k == 1:
 	        if abs(j1) < 1000:
-	            pause(5.5);
+	            time.sleep(5.5)
 	        else:
-	            u1 = 0.5*(round((abs(j1)-1000),-1)/100) + 5.5;
-	            pause(u1);
+	            u1 = 0.5*(round((abs(j1)-1000),-1)/100) + 5.5
+	            time.sleep(u1)
 	    elif k == 2:
-	        if abs(j36) <= 200
-	            pause(2);
+	        if abs(j36) <= 200:
+	            time.sleep(2)
 	        else:
-	            u2 = 0.5*(round((abs(j36)-200),-1)/100) + 2;
-	            pause(u2);
+	            u2 = 0.5*(round((abs(j36)-200),-1)/100) + 2
+	            time.sleep(u2)
 	currentj1 = 1050
 	currentj36 = -20
 	return currentj1, currentj36

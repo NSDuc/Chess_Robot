@@ -180,7 +180,7 @@ def detect_turned_roi(frame):
     roi = cropframe[y-r:y+r, x-r:x+r]
     # imshow('roi', roi)
 
-  return roi
+  return DY1+y, DX1+x, roi
 
 def test():
   picname = r"F:\nntest\testimg\Picture 205.jpg"

@@ -81,8 +81,8 @@ def calculate(predicted, posX, posY):
 
         if d > 34.5:
             d = 34.5
-            d_dif = d_src[i] - d
-            j45_theta = np.rad2deg(np.asin(d_dif / 9.2))
+            d_dif = d_src - d
+            j45_theta = np.rad2deg(np.arcsin(d_dif / 9.2))
             j45[i] = np.around(-j45_theta * 4.27)
         else:
             j45_rotate[i] = np.around((degree - 90) * 4.27)
