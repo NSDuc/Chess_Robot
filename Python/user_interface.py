@@ -14,6 +14,8 @@ import robot_arm
 
 import os
 import time, threading
+import ctypes
+import kill_thread
 import re
 
 import test_param
@@ -201,6 +203,8 @@ class MainWindow(QMainWindow):
         self.currentj1 = 0
         self.currentj36 = 0
         self.currentj6 = 0
+
+        self.robot_thread = None
 
     def cb_table(self, item):
         if item.row() >= len(self.raw_chess_list):
@@ -400,9 +404,8 @@ class MainWindow(QMainWindow):
         test_param.is_stop = False
         test_param.stop_cond.release()
 
-        th = threading.Thread(target=self.robot_work, args=())
-        th.daemon = True
-        th.start()
+        self.robot_thread = kill_thread.thread_with_exception('Robot', self.robot_work)
+        self.robot_thread.start()
 
     # Button2
     def cb_button_connect(self):
@@ -441,15 +444,11 @@ class MainWindow(QMainWindow):
             print("Robot on")
             robot_arm.writeSerial(robot_serial, matlab_serial, '@STEP 221, 0, 0, 0, 0, 0, 430', 2)
             self.currentj6 = 430
-            test_param.is_off = False
             self.robotOnBtn.setText("Robot off")
         else:
             print("Robot off")
-            test_param.is_off = True
-            test_param.stop_cond.acquire()
-            test_param.is_stop = False
-            test_param.stop_cond.notify()
-            test_param.stop_cond.release()
+            self.robot_thread.raise_exception()
+            self.robot_thread.join()
 
             robot_arm.writeSerial(robot_serial, matlab_serial, '@STEP 221, 0, 0, 0, 0, 0, -430', 2)
             self.currentj6 = 0
@@ -483,6 +482,9 @@ class MainWindow(QMainWindow):
         print("exitBtn")
         robot_serial.close()
         matlab_serial.close()
+        if self.robot_thread != None:
+            self.robot_thread.raise_exception()
+            self.robot_thread.join()
         self.close()
         sys.exit(0)
         # Disconnect from serial

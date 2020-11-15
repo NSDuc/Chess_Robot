@@ -13,5 +13,4 @@ def init():
   print_serial   = False
 
   is_stop = False
-  is_off  = False
   stop_cond = threading.Condition()

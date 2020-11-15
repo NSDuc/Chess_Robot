@@ -26,16 +26,6 @@ def writeSerial(robot, matlab, data, p=2):  # apply
         test_param.stop_cond.wait()
     test_param.stop_cond.release()
 
-    if test_param.is_off == True:
-        data = '@STEP 221, 0, 0, 0, 0, 0, -430'
-        if test_param.print_serial:
-            print("writeSerial: " + data)
-        else:
-            robot.write((data + ", 0\r").encode("ascii"))
-            matlab.write((data + ", " + str(p) + ', ' + str(seq) + ", 0\r").encode("ascii"))
-        print("Exit robot")
-        sys.exit()
-
     if test_param.print_serial:
         print("writeSerial: " + data)
     else:
