@@ -1,4 +1,4 @@
-﻿﻿import sys
+﻿import sys
 import serial
 import numpy as np
 import cv2
