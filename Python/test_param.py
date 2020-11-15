@@ -6,10 +6,12 @@ def init():
   global print_serial
   global is_stop
   global stop_cond
+  global is_off
 
   import_picture = False
   print_pause    = False
   print_serial   = False
 
   is_stop = False
+  is_off  = False
   stop_cond = threading.Condition()

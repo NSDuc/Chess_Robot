@@ -1,4 +1,4 @@
-﻿import sys
+﻿﻿import sys
 import serial
 import numpy as np
 import cv2
@@ -441,11 +441,18 @@ class MainWindow(QMainWindow):
             print("Robot on")
             robot_arm.writeSerial(robot_serial, matlab_serial, '@STEP 221, 0, 0, 0, 0, 0, 430', 2)
             self.currentj6 = 430
+            test_param.is_off = False
             self.robotOnBtn.setText("Robot off")
         else:
             print("Robot off")
+            test_param.is_off = True
+            test_param.stop_cond.acquire()
+            test_param.is_stop = False
+            test_param.stop_cond.notify()
+            test_param.stop_cond.release()
+
             robot_arm.writeSerial(robot_serial, matlab_serial, '@STEP 221, 0, 0, 0, 0, 0, -430', 2)
-            currentj6 = 0
+            self.currentj6 = 0
             self.robotOnBtn.setText("Robot on")
 
     # Button4
