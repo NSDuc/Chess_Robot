@@ -177,7 +177,7 @@ def detect_turned_roi(frame):
   for (x, y, r) in circles:
     # cv2.circle (cropframe2, (x,y), r, (0, 0, 100), 1)
     # imshow('cropframe2', cropframe2)
-    roi = cropframe[y-r:y+r, x-r:x+r]
+    roi = cropframe[y-r:y+r, x-r:x+r, :].copy()
     # imshow('roi', roi)
 
   return DY1+y, DX1+x, roi
