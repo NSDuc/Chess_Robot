@@ -242,57 +242,87 @@ class MainWindow(QMainWindow):
     def cb_button_recognition(self):
         self.reset_table()
         self.reset_variable()
+        if test_param.test_turncatch:
+            if test_param.import_picture:
+                picname = r"D:\Project\ChessRobot\AllSample\Picture " + self.textbox.text() + ".jpg"
+                if os.path.exists(picname) == False:
+                    return
+                frame2 = cv2.imread(picname)
 
-        if test_param.import_picture:  # apply
-            # picname = r"E:\robot_arm\nntest-20200914T132455Z-001\nntest\testimg\Picture " +self.textbox.text()+ ".jpg"
-            # picname = r"F:\nntest\testimg\Picture " +self.textbox.text()+ ".jpg"
-            picname = r"D:\Project\ChessRobot\nntest\testimg\Picture " + self.textbox.text() + ".jpg"
-            print(picname)
-            if os.path.exists(picname) == False:
-                return
-            self.setWindowTitle(picname)
-            src_img = cv2.imread(picname)
-        else:  # apply
-            src_img = self.captureFrame()
-            cv2.imwrite(r"C:\Users\Vu Trung Hieu\Documents\GitHub\Picture TC_0.jpg", src_img)
+            else:
+                frame2 = self.captureFrame()
+                cv2.imwrite(r"C:\Users\Vu Trung Hieu\Documents\GitHub\Picture TC_1.jpg", frame2)
+            # tx, ty  = catchroi.turn_catch(frame2)
+            # turnroi = frame2[tx-50:tx+49,ty-50:ty+49,:]
 
-        self.textbox.setText("")
-        qformat = QImage.Format_RGB888
-        img = QImage(src_img,
-                     src_img.shape[1],
-                     src_img.shape[0],
-                     src_img.strides[0],
-                     qformat)
-        img = img.rgbSwapped()
-        self.label1.setPixmap(QPixmap.fromImage(img).scaledToWidth(360))
-        self.label1.setAlignment(Qt.AlignCenter)
+            qformat = QImage.Format_RGB888
+            img = QImage(frame2,
+                         frame2.shape[1],
+                         frame2.shape[0],
+                         frame2.strides[0],
+                         qformat)
+            img = img.rgbSwapped()
+            self.label1.setPixmap(QPixmap.fromImage(img).scaledToWidth(360))
+            self.label1.setAlignment(Qt.AlignCenter)
 
-        openbw, self.raw_chess_list, posX, posY = catchroi.detect_roi(src_img)
-        qformat = QImage.Format_Indexed8
-        img = QImage(openbw,
-                     openbw.shape[1],
-                     openbw.shape[0],
-                     openbw.strides[0],
-                     qformat)
-        img = img.rgbSwapped()
-        self.label2.setPixmap(QPixmap.fromImage(img).scaledToWidth(360))
-        self.label2.setAlignment(Qt.AlignCenter)
+            tx, ty, turnroi = catchroi.detect_turned_roi(frame2)
 
-        print('Number of chess: ' + str(len(self.raw_chess_list)))
+            label, bw_chess = ConvoNN.ConvoNN(turnroi)
+            print("label: ")
+            print(label)
+            self.tableWidget.setItem(0, 0, QTableWidgetItem(label))
+        else:
+            if test_param.import_picture:  # apply
+                # picname = r"E:\robot_arm\nntest-20200914T132455Z-001\nntest\testimg\Picture " +self.textbox.text()+ ".jpg"
+                # picname = r"F:\nntest\testimg\Picture " +self.textbox.text()+ ".jpg"
+                # picname = r"D:\Project\ChessRobot\nntest\testimg\Picture " + self.textbox.text() + ".jpg"
+                picname = r"D:\Project\ChessRobot\AllSample\Picture " + self.textbox.text() + ".jpg"
+                print(picname)
+                if os.path.exists(picname) == False:
+                    return
+                self.setWindowTitle(picname)
+                src_img = cv2.imread(picname)
+            else:  # apply
+                src_img = self.captureFrame()
+                cv2.imwrite(r"C:\Users\Vu Trung Hieu\Documents\GitHub\Picture TC_0.jpg", src_img)
 
-        label_list = []
-        for raw_chess in self.raw_chess_list:
-            label, bw_chess = ConvoNN.ConvoNN(raw_chess)
-            label_list.append(label)
-            self.chess_list.append(bw_chess)
+            self.textbox.setText("")
+            qformat = QImage.Format_RGB888
+            img = QImage(src_img,
+                         src_img.shape[1],
+                         src_img.shape[0],
+                         src_img.strides[0],
+                         qformat)
+            img = img.rgbSwapped()
+            self.label1.setPixmap(QPixmap.fromImage(img).scaledToWidth(360))
+            self.label1.setAlignment(Qt.AlignCenter)
 
-        self.predicted = np.array(label_list).T
+            openbw, self.raw_chess_list, posX, posY = catchroi.detect_roi(src_img)
+            qformat = QImage.Format_Indexed8
+            img = QImage(openbw,
+                         openbw.shape[1],
+                         openbw.shape[0],
+                         openbw.strides[0],
+                         qformat)
+            img = img.rgbSwapped()
+            self.label2.setPixmap(QPixmap.fromImage(img).scaledToWidth(360))
+            self.label2.setAlignment(Qt.AlignCenter)
 
-        for i in range(len(self.chess_list)):
-            self.tableWidget.setItem(i, 0, QTableWidgetItem(self.predicted[i]))
-            self.tableWidget.setItem(i, 1, QTableWidgetItem(str(posX[i])))
-            self.tableWidget.setItem(i, 2, QTableWidgetItem(str(posY[i])))
-        self.chess, self.order, self.index, self.prior = calcu_position.calculate(self.predicted, posX, posY)
+            print('Number of chess: ' + str(len(self.raw_chess_list)))
+
+            label_list = []
+            for raw_chess in self.raw_chess_list:
+                label, bw_chess = ConvoNN.ConvoNN(raw_chess)
+                label_list.append(label)
+                self.chess_list.append(bw_chess)
+
+            self.predicted = np.array(label_list).T
+
+            for i in range(len(self.chess_list)):
+                self.tableWidget.setItem(i, 0, QTableWidgetItem(self.predicted[i]))
+                self.tableWidget.setItem(i, 1, QTableWidgetItem(str(posX[i])))
+                self.tableWidget.setItem(i, 2, QTableWidgetItem(str(posY[i])))
+            self.chess, self.order, self.index, self.prior = calcu_position.calculate(self.predicted, posX, posY)
 
     def robot_work(self):
         chess = self.chess

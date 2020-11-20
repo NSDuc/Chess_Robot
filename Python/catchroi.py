@@ -55,7 +55,7 @@ def catchroi(src):
   posX_sort[:] = posX[sort_index]
   posY_sort[:] = posY[sort_index]
   for index in sort_index:
-    chess_list_sort.append(chess_list[index])
+    chess_list_sort.append(chess_list[index].copy())
 
   return openbw, chess_list_sort, posX_sort, posY_sort
 
@@ -122,7 +122,7 @@ def detect_roi(original):
                  [0,1,0]], np.uint8)
   regionprops_bw = cv2.erode(openbw, se, iterations = 1)
 
-  imshow('openbw',cv2.resize(openbw, (640,590)))
+  # imshow('openbw',cv2.resize(openbw, (640,590)))
 
   # labels = measure.label(openbw)
   labels = measure.label(regionprops_bw)
@@ -147,13 +147,13 @@ def detect_roi(original):
       if (width - (centerY - minr)*2) > 5:
         width = (centerY - minr)*2 + 1
       # subimg  = original[minr:maxr, minc:maxc].copy()
-      subimg = original[minr:minr+width, minc:minc+length]
+      subimg = original[minr:minr+width, minc:minc+length, :].copy()
       posX_list.append(centerX)
       posY_list.append(centerY)
       chess_list.append(subimg)
 
       num_chess += 1
-      imshow('subimg', subimg)
+      # imshow('subimg', subimg)
       # subimg2[centerY-minr-2:centerY-minr+2, centerX-minc-2: centerX-minc+2] = (255,0,0)
       # imshow('subimg2', subimg2)
     # elif (width > 30) and (length > 30):
@@ -223,7 +223,7 @@ def test():
     openbw, chess_list, posX_sort, posY_sort = detect_roi(img)
     for raw_chess in chess_list:
       label, bw_chess = ConvoNN.ConvoNN(raw_chess)
-      imshow("bw_chess", bw_chess)
+      # imshow("bw_chess", bw_chess)
       print(label)
 
   # picname = r"F:\nntest\testimg\Picture 101.jpg"
@@ -246,7 +246,7 @@ def test_detect_turned_roi():
   for picname in picnames:
     frame = cv2.imread (picname)
     _, _, roi = detect_turned_roi(frame)
-    imshow('roi', roi)
+    # imshow('roi', roi)
 
     label, bw_chess = ConvoNN.ConvoNN(roi)
     print(label)
@@ -265,5 +265,5 @@ def imshow(name, image):
   cv2.waitKey(0)
   cv2.destroyWindow(name)
 
-test()
+# test()
 # test_detect_turned_roi()
