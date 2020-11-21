@@ -116,21 +116,26 @@ def detect_roi(original):
 
 
   openbw = cv2.morphologyEx(bw, cv2.MORPH_CLOSE, se)
+  # imshow('openbw',cv2.resize(openbw, (640,590)))
   
   se = np.array([[0,1,0],
                  [1,1,1],
                  [0,1,0]], np.uint8)
+
+  se = np.ones((2,2))
+  se_range = se.shape[0]
   regionprops_bw = cv2.erode(openbw, se, iterations = 1)
 
   # imshow('openbw',cv2.resize(openbw, (640,590)))
 
-  # labels = measure.label(openbw)
   labels = measure.label(regionprops_bw)
   props  = measure.regionprops(labels)
 
   num_chess = 0
   for prop in props:
     minr, minc, maxr, maxc = prop.bbox
+    minr, minc, maxr, maxc = minr-se_range, minc-se_range, \
+                             maxr+se_range, maxc+se_range
     width  = maxr - minr
     length = maxc - minc
     mean = openbw[minr:maxr, minc:maxc].mean(axis=0).mean(axis=0)
@@ -262,7 +267,8 @@ def im2bw(image, level):
 
 def imshow(name, image):
   cv2.imshow(name, image)
-  cv2.waitKey(0)
+  if cv2.waitKey(0) == ord('q'):
+    exit()
   cv2.destroyWindow(name)
 
 # test()
