@@ -6,7 +6,7 @@ import cnn.train as train
 chess_label2 = ['Chariot', 'Elephant', 'General', 'Soldier']
 
 model_red = train.load_cnn2("./cnn/redA.pth")
-model_black = train.load_cnn2("./cnn/blackA.pth")
+model_black = train.load_cnn2("./cnn/blackA3.pth")
 
 def ConvoNN(raw_chess):
   global chess_label2
@@ -33,3 +33,9 @@ def ConvoNN(raw_chess):
     bw_chess = preprocess.process (gray, 0.65)
     label = train.predict(model_black, bw_chess, 'b')
   return label, bw_chess
+
+def imshow(name, image):
+  cv2.imshow(name, image)
+  if cv2.waitKey(0) == ord('q'):
+    exit()
+  cv2.destroyWindow(name)
