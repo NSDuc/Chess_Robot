@@ -19,6 +19,7 @@ if 1:
 	picnames = np.array([
 		'Picture 0.jpg', 'Picture 1.jpg', 'Picture 2.jpg', 'Picture 3.jpg', \
 		'Picture 4.jpg', 'Picture 5.jpg', 'Picture 6.jpg', 'Picture 7.jpg', \
+		# 'Picture 23.jpg'
 		# 'Picture 100.jpg', 'Picture 101.jpg', 'Picture 191.jpg'\
 		# 'Picture 198.jpg'\
 		# 'Picture1.jpg', 'Picture2.jpg', 'Picture3.jpg', 'Picture4.jpg', \
