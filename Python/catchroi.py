@@ -99,22 +99,40 @@ def detect_turned_roi(frame):
   Xc, Yc = 620, 640
   DX1, DX2, DY1, DY2 = Xc-100, Xc+100, Yc-100, Yc+100
 
-  cropframe  = frame[DX1:DX2, DY1:DY2, :].copy()
-  gray   = cv2.cvtColor (cropframe, cv2.COLOR_BGR2GRAY)
-  # recogn = cv2.Canny (gray, 20, 120)
-  recogn = cv2.blur(gray, (2,2))
-  # imshow("recogn", recogn)
-  # circles = cv2.HoughCircles (recogn, cv2.HOUGH_GRADIENT, 1, 40,
-  #                             param1=128,param2=50,minRadius=20,maxRadius=60)
-  circles = cv2.HoughCircles(recogn, cv2.HOUGH_GRADIENT, 1.2, 90,
-                             param1=50,param2=50,minRadius=43,maxRadius=53)
+  # cropframe  = frame[DX1:DX2, DY1:DY2, :].copy()
+  # gray   = cv2.cvtColor (cropframe, cv2.COLOR_BGR2GRAY)
+  # recogn = cv2.GaussianBlur(gray,(11,11),0) # 2/33
+  # circles = cv2.HoughCircles(recogn, cv2.HOUGH_GRADIENT, 1.2, 90,
+  #                            param1=50,param2=50,minRadius=43,maxRadius=53)
 
+  cropframe  = frame[DX1:DX2, DY1:DY2, :].copy()
+  b,g,r = cv2.split(cropframe)
+  recogn = (0.1*r + 0.1*g + 0.8*b).astype(np.uint8)
+
+  circles = cv2.HoughCircles (recogn, cv2.HOUGH_GRADIENT, 1, 30,
+                              param1=40,param2=40,minRadius=43,maxRadius=53)
+  if circles is None:
+    circles = cv2.HoughCircles (recogn, cv2.HOUGH_GRADIENT, 1, 30,
+                                param1=40,param2=60,minRadius=43,maxRadius=53)
+
+
+  # imshow("recogn", recogn)
   circles = np.round (circles[0, :]).astype(np.int)
   for (x, y, r) in circles:
-    # cv2.circle (cropframe2, (x,y), r, (0, 0, 100), 1)
-    # imshow('cropframe2', cropframe2)
-    roi = cropframe[y-r:y+r, x-r:x+r, :].copy()
-    # imshow('roi', roi)
+    if r <= 46:
+      r += 2
+    elif r >= 50:
+      r -= 2
+    minr = y-r
+    maxr = y+r
+    minc = x-r
+    maxc = x+r
+    if minr < 0:
+      minr = 0
+    if minc < 0:
+      minc = 0
+    # roi = cropframe[y-r:y+r, x-r:x+r, :].copy()
+    roi = cropframe[minr:maxr, minc:maxc, :].copy()
 
   return DY1+y, DX1+x, roi
 
