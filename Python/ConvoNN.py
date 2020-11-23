@@ -3,9 +3,10 @@ import numpy as np
 import preprocess
 import cnn.train as train
 
-chess_label2 = ['Chariot', 'Elephant', 'General', 'Soldier']
+labels_cceg = np.array(["炮 rCannon", "俥 rChariot", "相 rElephant", "仕 rGuard"])
 
 model_red = train.load_cnn2("./cnn/redA.pth")
+model_red_cceg = train.load_cnn2_cceg("./cnn/redA_cceg.20e.big_data.pth")
 model_black = train.load_cnn2("./cnn/blackA.pth")
 
 def ConvoNN(raw_chess):
@@ -25,6 +26,12 @@ def ConvoNN(raw_chess):
   if (median_rb > median_gb and median_rb >= 5):
     bw_chess = preprocess.process (gray, 0.66)
     label = train.predict(model_red, bw_chess, 'r')
+    if ((labels_cceg == label).any()):
+      label_new = train.predict_cceg(model_red_cceg, bw_chess, 'r')
+      if(label_new != label):
+        print('change from ', label, ' to ', label_new)
+        label = label_new
+
   elif (median_gb > median_rb and median_gb >= 14):
     label = 'Unknown'
     bw = cv2.threshold(gray, 0.38, 255, cv2.THRESH_BINARY)[1]

@@ -6,6 +6,8 @@ import numpy as np
 import cv2
 import ConvoNN
 
+NIGHT = True
+DAY   = not NIGHT
 
 def detect_roi(original):
   chess_list = []
@@ -15,7 +17,11 @@ def detect_roi(original):
   recognition = (0.1*r + 0.1*g + 0.8*b).astype(np.uint8)
   # imshow('recognition',cv2.resize(recognition, (640,590)))
   thresh = threshold_otsu (recognition)
-  level  = int(thresh*0.72)
+  if NIGHT:
+    level  = int(thresh*0.72)
+  elif DAY:
+    level  = int(thresh*0.8)
+
   _ , bw = cv2.threshold (recognition, level, 255, cv2.THRESH_BINARY_INV)
 
   # imshow('bw',cv2.resize(bw, (640,590)))
@@ -109,8 +115,13 @@ def detect_turned_roi(frame):
   b,g,r = cv2.split(cropframe)
   recogn = (0.1*r + 0.1*g + 0.8*b).astype(np.uint8)
 
-  circles = cv2.HoughCircles (recogn, cv2.HOUGH_GRADIENT, 1, 30,
-                              param1=40,param2=40,minRadius=43,maxRadius=53)
+  if NIGHT:
+    circles = cv2.HoughCircles (recogn, cv2.HOUGH_GRADIENT, 1, 30,
+                                param1=40,param2=40,minRadius=43,maxRadius=53)
+  elif DAY:
+    circles = cv2.HoughCircles (recogn, cv2.HOUGH_GRADIENT, 1, 30,
+                              param1=80,param2=40,minRadius=43,maxRadius=53)
+
   if circles is None:
     circles = cv2.HoughCircles (recogn, cv2.HOUGH_GRADIENT, 1, 30,
                                 param1=40,param2=60,minRadius=43,maxRadius=53)

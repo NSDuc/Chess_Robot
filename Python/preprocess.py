@@ -3,8 +3,8 @@ import numpy as np
 from skimage.filters import threshold_otsu
 def process(gray, k):
     thresh = threshold_otsu (gray)
-    _ , bw = cv2.threshold (gray, thresh, 255, cv2.THRESH_BINARY) # Original 0.72
-    bw = 255 - bw
+    _ , bw = cv2.threshold (gray, thresh, 255, cv2.THRESH_BINARY_INV) # Original 0.72
+    # bw = 255 - bw
 
     se = np.array([[0,0,1,0,0],
                    [0,1,1,1,0],

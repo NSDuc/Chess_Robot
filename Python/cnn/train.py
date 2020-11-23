@@ -74,10 +74,46 @@ class Net2(nn.Module):
         output = self.out(x)
         return output, x           # return x for visualization
 
+class Net2_cceg(nn.Module):
+    def __init__(self):
+        super(Net2_cceg, self).__init__()
+
+        self.conv1 = nn.Sequential(         # input shape (1, 90, 90)
+            nn.Conv2d(
+                in_channels=1,              # input height
+                out_channels=16,            # n_filters
+                kernel_size=3,              # filter size
+                stride=1,                   # filter movement/step
+                padding=2,                  # if want same width and length of this image after Conv2d, padding=(kernel_size-1)/2 if stride=1
+            ),                              # output shape (16, 90, 90)
+            nn.BatchNorm2d(16),
+            nn.ReLU(),                      # activation
+            nn.MaxPool2d(kernel_size=2),    # choose max value in 2x2 area, output shape (16, 45, 45)
+        )
+        self.conv2 = nn.Sequential(         # input shape (16, 45, 45)
+            nn.Conv2d(16, 32, 3, 1, 1),     # output shape (32, 45, 45)
+            nn.BatchNorm2d(32),
+            nn.ReLU(),                      # activation
+            nn.MaxPool2d(2),                # output shape (32, 23, 23)
+        )
+        self.out = nn.Linear(
+            in_features=(32 *23 *23),
+            out_features=4
+        )   # fully connected layer, output 7 classes
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = x.view(x.size(0), -1)  # flatten the output of conv2 to (batch_size, 32 * 7 * 7)
+        output = self.out(x)
+        return output, x           # return x for visualization
+
 
 TRAN_TO_TENSOR = transforms.ToTensor()
 LABEL_MAPS_RED = ["炮 rCannon", "俥 rChariot", "相 rElephant", "帥 rGeneral", "仕 rGuard", "傌 rHorse", "兵 rSoldier"]
 LABEL_MAPS_BLACK = ["包 bCannon", "車 bChariot", "象 bElephant", "將 bGeneral", "士 bGuard", "馬 bHorse", "卒 bSoldier"]
+LABEL_MAPS_RED_CCEG = ["炮 rCannon", "俥 rChariot", "相 rElephant", "仕 rGuard"]
+LABEL_MAPS_BLACK_CCEG = ["包 bCannon", "車 bChariot", "象 bElephant", "士 bGuard"]
 
 def load_cnn(path):
     model = Net()
@@ -85,6 +121,10 @@ def load_cnn(path):
     return model
 def load_cnn2(path):
     model = Net2()
+    model.load_state_dict(torch.load(path))
+    return model
+def load_cnn2_cceg(path):
+    model = Net2_cceg()
     model.load_state_dict(torch.load(path))
     return model
 
@@ -98,25 +138,41 @@ def predict(model, cvimage, color):
     elif color == 'b':
         return LABEL_MAPS_BLACK[predicted]
 
+def predict_cceg(model, cvimage, color):
+    ptimage = TRAN_TO_TENSOR(cvimage).unsqueeze(0)
+
+    outputs, auxq = model(ptimage)
+    _, predicted = torch.max(outputs, 1)
+    if color == 'r':
+        return LABEL_MAPS_RED_CCEG[predicted]
+    elif color == 'b':
+        return LABEL_MAPS_BLACK_CCEG[predicted]
+
 if __name__ == '__main__':
 
     TRAIN = True # True False
     TEST  = True # True False
 
-    COLOR       = "black" # red black
-    MODEL_CLASS = "Net2" # Net2 Net
-
+    COLOR       = "red" # red black
+    MODEL_CLASS = "Net2_cceg" # Net2 Net
+    MODE_CCEG   = True
     
-    if COLOR == "red":
+    if COLOR == "red" and MODE_CCEG == False:
         MODEL_PATH = 'redA.pth'
         TEST_SIZE = 18
-        EPOCH = 10
+    elif COLOR == "red" and MODE_CCEG == True:
+        MODEL_PATH = 'redA_cceg.pth'
+        TEST_SIZE = 18
     else: 
         MODEL_PATH = 'blackA.pth'
         TEST_SIZE = 17
-        EPOCH = 10
+    
+    EPOCH = 10
 
-    DATA_PATH = "data_" + COLOR
+    if MODE_CCEG:
+        DATA_PATH = "sub_data_" + COLOR
+    else:
+        DATA_PATH = "data_" + COLOR
     TEST_PATH = "data_" + COLOR + "_test/"
 	
     if TRAIN:
@@ -139,6 +195,8 @@ if __name__ == '__main__':
         #load mạng CNN từ Net/Net2 Class
         if MODEL_CLASS == "Net":
             net = Net()
+        elif MODEL_CLASS == "Net2_cceg":
+            net = Net2_cceg()
         else:
             net = Net2()
 
