@@ -244,7 +244,7 @@ class MainWindow(QMainWindow):
         self.reset_variable()
         if test_param.test_turncatch:
             if test_param.import_picture:
-                picname = r"D:\Project\ChessRobot\AllSample\Picture " + self.textbox.text() + ".jpg"
+                picname = r"D:\Project\ChessRobot\Test2\Picture " + self.textbox.text() + ".jpg"
                 if os.path.exists(picname) == False:
                     return
                 frame2 = cv2.imread(picname)
@@ -275,8 +275,8 @@ class MainWindow(QMainWindow):
             if test_param.import_picture:  # apply
                 # picname = r"E:\robot_arm\nntest-20200914T132455Z-001\nntest\testimg\Picture " +self.textbox.text()+ ".jpg"
                 # picname = r"F:\nntest\testimg\Picture " +self.textbox.text()+ ".jpg"
-                # picname = r"D:\Project\ChessRobot\nntest\testimg\Picture " + self.textbox.text() + ".jpg"
-                picname = r"D:\Project\ChessRobot\AllSample\Picture " + self.textbox.text() + ".jpg"
+                picname = r"D:\Project\ChessRobot\nntest\testimg\Picture " + self.textbox.text() + ".jpg"
+                # picname = r"D:\Project\ChessRobot\Test2\Picture " + self.textbox.text() + ".jpg"
                 print(picname)
                 if os.path.exists(picname) == False:
                     return
